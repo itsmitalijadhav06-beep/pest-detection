@@ -1,18 +1,26 @@
-# Python/Venv
+# Virtual environments
 .venv/
 venv/
+
+# Python cache
 __pycache__/
 *.pyc
 
-# OS
+# OS junk files
 .DS_Store
 Thumbs.db
 
-# VSCode
+# IDE settings
 .vscode/
-
-# PyCharm
 .idea/
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Large ML model files (DO NOT TRACK IN GIT)
+*.h5
+*.keras
+*.pkl
+
+# Images + uploads (optional)
+uploads/
