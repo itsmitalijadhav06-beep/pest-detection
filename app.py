@@ -10,11 +10,14 @@ app = FastAPI()
 # ✅ CORS FIX (VERY IMPORTANT)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # allow all for hackathon
+    allow_origins=["*"],          # Allow all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],          # Allow all HTTP methods
+    allow_headers=["*"],          # Allow all headers
+    expose_headers=["*"],         # <-- IMPORTANT for frontend fetch
 )
+
+
 
 MODEL_PATH = "pest_inception_transfer.h5"
 model = tf.keras.models.load_model(MODEL_PATH)
