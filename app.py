@@ -1,57 +1,31 @@
-from fastapi import FastAPI, File, UploadFile
+from dotenv import load_dotenv
+load_dotenv()
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
-import numpy as np
-import tensorflow as tf
-import io
+from routes.auth_routes import router as auth_router
+from routes.prediction_routes import router as prediction_router
+from routes.analytics_routes import router as analytics_router
+from routes.alerts_routes import router as alerts_router
 
-app = FastAPI()
 
-# ✅ CORS FIX (VERY IMPORTANT)
+app = FastAPI(title="Pest Detection API")
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # Allow all origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],          # Allow all HTTP methods
-    allow_headers=["*"],          # Allow all headers
-    expose_headers=["*"],         # <-- IMPORTANT for frontend fetch
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-
-
-MODEL_PATH = "pest_inception_transfer.h5"
-model = tf.keras.models.load_model(MODEL_PATH)
-
-CLASS_NAMES = [
-    "green_leafhopper",
-    "planthopper",
-    "rice_bug",
-    "rice_leaf_roller",
-    "rice_stem_borer"
-]
+# Routes
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(prediction_router, prefix="/api")
+app.include_router(analytics_router)
+app.include_router(alerts_router)
 
 @app.get("/")
 def home():
     return {"message": "Pest Detection API is running"}
-
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    try:
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        image = image.resize((299, 299))
-
-        img_array = np.array(image) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
-
-        predictions = model.predict(img_array)
-        predicted_index = int(np.argmax(predictions))
-        confidence = float(np.max(predictions))
-
-        return {
-            "predicted_class": CLASS_NAMES[predicted_index],
-            "confidence": round(confidence, 4)
-        }
-
-    except Exception as e:
-        return {"error": str(e)}

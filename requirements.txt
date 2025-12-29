@@ -1,8 +1,23 @@
+# Core ML
 tensorflow==2.10.0
-fastapi==0.95.2
-uvicorn[standard]==0.22.0
 numpy==1.26.4
-python-multipart
 pillow
 h5py==3.7.0
+
+# FastAPI server
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
 pydantic==1.10.13
+python-multipart
+
+# Environment
+python-dotenv
+
+# Database
+pymongo
+motor
+
+# Auth & Security
+passlib[bcrypt]
+python-jose
+werkzeug
