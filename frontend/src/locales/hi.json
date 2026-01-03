@@ -1,0 +1,59 @@
+{
+  "dashboardTitle": "प्रारंभिक चेतावनी डैशबोर्ड",
+  "dashboardSubtitle": "अपने खेत में कीट पहचान और जोखिम स्तर की निगरानी करें",
+
+  "autoRefresh": "स्वचालित रिफ्रेश",
+  "refresh": "रिफ्रेश",
+
+  "dashboardError": "डैशबोर्ड डेटा त्रुटि",
+  "dashboardErrorDesc": "लाइव एनालिटिक्स लोड करने में विफल",
+
+  "highRiskAlert": "उच्च जोखिम चेतावनी!",
+  "highRiskDesc": "कीट खतरे को दूर करने के लिए तुरंत कार्रवाई आवश्यक",
+
+  "totalDetections": "कुल पहचान",
+  "highRisk": "उच्च जोखिम",
+  "mediumRisk": "मध्यम जोखिम",
+  "lowRisk": "कम जोखिम",
+
+  "allTime": "अब तक",
+  "immediateAttention": "तत्काल ध्यान",
+  "monitorClosely": "करीबी निगरानी",
+  "underControl": "नियंत्रण میں",
+
+  "recentDetections": "हाल की पहचान",
+  "noRecent": "कोई हालिया पहचान नहीं",
+
+  "liveTitle": "लाइव मॉनिटरिंग",
+  "liveSubtitle": "स्वचालित कैप्चर के साथ वास्तविक समय कीट पहचान",
+  "autoMode": "ऑटो मोड",
+  "openCamera": "कैमरा खोलें",
+  "startMonitoring": "मॉनिटरिंग शुरू करें",
+  "cameraOff": "कैमरा बंद",
+  "sessionCaptures": "सत्र कैप्चर",
+  "autoCaptureMode": "ऑटो कैप्चर मोड",
+  "manualCaptureMode": "मैन्युअल कैप्चर मोड",
+  "waitingDetection": "डिटेक्शन की प्रतीक्षा…",
+  "cameraError": "कैमरा त्रुटि",
+  "cameraErrorDesc": "कृपया कैमरा अनुमति दें",
+  "highRiskDetected": "⚠️ उच्च जोखिम पाया गया",
+  "detectedSuffix": "पाया गया",
+
+  "aiPestDetection": "एआई संचालित कीट पहचान",
+  "identifyPestsTitle": "कीटों की तुरंत पहचान करें",
+  "cameraTab": "कैमरा",
+  "uploadTab": "अपलोड",
+  "capturePhoto": "फ़ोटो कैप्चर करें",
+  "clickOrDragImage": "क्लिक करें या छवि खींचें",
+  "analyzing": "विश्लेषण हो रहा है…",
+  "analyzeImage": "छवि विश्लेषण करें",
+  "recentActivity": "हाल की गतिविधि",
+
+  "fileTooLarge": "फ़ाइल बहुत बड़ी है",
+  "fileTooLargeDesc": "कृपया 10MB से कम आकार की छवि चुनें।",
+  "detectionSuccess": "डिटेक्शन सफल",
+  "detectionSuccessDesc": "{{pestName}} पाया गया ({{confidence}}%)",
+  "highRiskDetectedDesc": "{{pestName}} पाया गया ({{confidence}}%)",
+  "predictionFailed": "प्रेडिक्शन विफल",
+  "serverError": "सर्वर त्रुटि"
+}

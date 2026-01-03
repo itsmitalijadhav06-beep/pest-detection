@@ -1,0 +1,59 @@
+{
+  "dashboardTitle": "पूर्वसूचना डॅशबोर्ड",
+  "dashboardSubtitle": "तुमच्या शेतातील कीड ओळख आणि जोखीम पातळीची निगराणी करा",
+
+  "autoRefresh": "स्वयंचलित रीफ्रेश",
+  "refresh": "रीफ्रेश",
+
+  "dashboardError": "डॅशबोर्ड डेटा त्रुटी",
+  "dashboardErrorDesc": "लाईव्ह विश्‍लेषण लोड करण्यात अयशस्वी",
+
+  "highRiskAlert": "उच्च जोखीम सूचना!",
+  "highRiskDesc": "कीडधोका टाळण्यासाठी तात्काळ कारवाई आवश्यक",
+
+  "totalDetections": "एकूण ओळख",
+  "highRisk": "उच्च जोखीम",
+  "mediumRisk": "मध्यम जोखीम",
+  "lowRisk": "कमी जोखीम",
+
+  "allTime": "आतापर्यंत",
+  "immediateAttention": "तात्काळ लक्ष आवश्यक",
+  "monitorClosely": "जवळून निरीक्षण करा",
+  "underControl": "नियंत्रणात",
+
+  "recentDetections": "अलीकडील ओळख",
+  "noRecent": "अलीकडे कोणतीही ओळख नाही",
+
+  "liveTitle": "लाईव्ह मॉनिटरिंग",
+  "liveSubtitle": "स्वयंचलित कॅप्चरसह वास्तविक वेळ कीड ओळख",
+  "autoMode": "ऑटो मोड",
+  "openCamera": "कॅमेरा उघडा",
+  "startMonitoring": "मॉनिटरिंग सुरू करा",
+  "cameraOff": "कॅमेरा बंद",
+  "sessionCaptures": "सेशन कॅप्चर",
+  "autoCaptureMode": "ऑटो कॅप्चर मोड",
+  "manualCaptureMode": "मॅन्युअल कॅप्चर मोड",
+  "waitingDetection": "ओळखीची प्रतीक्षा…",
+  "cameraError": "कॅमेरा त्रुटी",
+  "cameraErrorDesc": "कृपया कॅमेरा परवानगी द्या",
+  "highRiskDetected": "⚠️ उच्च जोखीम आढळली",
+  "detectedSuffix": "आढळले",
+
+  "aiPestDetection": "एआय-आधारित कीड ओळख",
+  "identifyPestsTitle": "कीड त्वरित ओळखा",
+  "cameraTab": "कॅमेरा",
+  "uploadTab": "अपलोड",
+  "capturePhoto": "फोटो कॅप्चर करा",
+  "clickOrDragImage": "क्लिक करा किंवा प्रतिमा ड्रॅग करा",
+  "analyzing": "विश्लेषण सुरू आहे…",
+  "analyzeImage": "प्रतिमा विश्लेषण करा",
+  "recentActivity": "अलीकडील क्रियाकलाप",
+
+  "fileTooLarge": "फाइल खूप मोठी आहे",
+  "fileTooLargeDesc": "कृपया 10MB पेक्षा कमी आकाराची प्रतिमा निवडा.",
+  "detectionSuccess": "ओळख यशस्वी",
+  "detectionSuccessDesc": "{{pestName}} आढळले ({{confidence}}%)",
+  "highRiskDetectedDesc": "{{pestName}} आढळले ({{confidence}}%)",
+  "predictionFailed": "भाकीत अयशस्वी",
+  "serverError": "सर्व्हर त्रुटी"
+}

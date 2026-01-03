@@ -1,0 +1,59 @@
+{
+  "dashboardTitle": "Early Warning Dashboard",
+  "dashboardSubtitle": "Monitor pest detection status and risk levels across your farm",
+
+  "autoRefresh": "Auto-refresh",
+  "refresh": "Refresh",
+
+  "dashboardError": "Dashboard data error",
+  "dashboardErrorDesc": "Failed to load live analytics",
+
+  "highRiskAlert": "High Risk Alert!",
+  "highRiskDesc": "Immediate action recommended to address pest threats",
+
+  "totalDetections": "Total Detections",
+  "highRisk": "High Risk",
+  "mediumRisk": "Medium Risk",
+  "lowRisk": "Low Risk",
+
+  "allTime": "All time",
+  "immediateAttention": "Immediate attention",
+  "monitorClosely": "Monitor closely",
+  "underControl": "Under control",
+
+  "recentDetections": "Recent Detections",
+  "noRecent": "No recent detections",
+
+  "liveTitle": "Live Monitoring",
+  "liveSubtitle": "Real-time pest detection with automatic capture",
+  "autoMode": "Auto Mode",
+  "openCamera": "Open Camera",
+  "startMonitoring": "Start Monitoring",
+  "cameraOff": "Camera Off",
+  "sessionCaptures": "Session Captures",
+  "autoCaptureMode": "Auto capture mode",
+  "manualCaptureMode": "Manual capture mode",
+  "waitingDetection": "Waiting for detection…",
+  "cameraError": "Camera error",
+  "cameraErrorDesc": "Please allow camera permission",
+  "highRiskDetected": "⚠️ High Risk Detected",
+  "detectedSuffix": "detected",
+
+  "aiPestDetection": "AI-Powered Pest Detection",
+  "identifyPestsTitle": "Identify Pests Instantly",
+  "cameraTab": "Camera",
+  "uploadTab": "Upload",
+  "capturePhoto": "Capture Photo",
+  "clickOrDragImage": "Click or drag image",
+  "analyzing": "Analyzing…",
+  "analyzeImage": "Analyze Image",
+  "recentActivity": "Recent Activity",
+
+  "fileTooLarge": "File too large",
+  "fileTooLargeDesc": "Please select an image under 10MB.",
+  "detectionSuccess": "Detection successful",
+  "detectionSuccessDesc": "{{pestName}} detected ({{confidence}}%)",
+  "highRiskDetectedDesc": "{{pestName}} detected ({{confidence}}%)",
+  "predictionFailed": "Prediction failed",
+  "serverError": "Server error"
+}
