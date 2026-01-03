@@ -107,3 +107,47 @@ def recent_predictions(user_id: str = Depends(get_current_user)):
         }
         for d in data
     ]
+# =========================
+# DAILY PEST ANALYSIS
+# =========================
+from datetime import datetime, timedelta
+
+@router.get("/daily")
+def daily_pest_analysis(user_id: str = Depends(get_current_user)):
+    uid = ObjectId(user_id)
+
+    # Start of today
+    start_of_day = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # End of today
+    end_of_day = start_of_day + timedelta(days=1)
+
+    pipeline = [
+        {
+            "$match": {
+                "userId": uid,
+                "createdAt": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": "$pestName",
+                "count": {"$sum": 1}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "pestName": "$_id",
+                "count": 1
+            }
+        },
+        {
+            "$sort": {"count": -1}
+        }
+    ]
+
+    return list(predictions_collection.aggregate(pipeline))
