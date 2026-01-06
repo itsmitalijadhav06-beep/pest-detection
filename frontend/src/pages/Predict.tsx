@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DetectionCard } from '@/components/DetectionCard';
+import { PestInfoTabs } from '@/components/PestInfoTabs';
 import { useToast } from '@/hooks/use-toast';
 import { predictApi, alertApi, analyticsApi } from '@/lib/api';
 
@@ -30,7 +31,7 @@ export const Predict = () => {
   const { toast } = useToast();
 
   /* ===============================
-     USERNAME (ROBUST FIX)
+     USERNAME
   =============================== */
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -222,14 +223,12 @@ export const Predict = () => {
             <Card onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
               <div className="p-6">
                 {activeTab === 'camera' ? (
-                  <div className="relative">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      className="rounded-lg max-h-80 mx-auto w-full bg-black"
-                    />
-                  </div>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className="rounded-lg max-h-80 mx-auto w-full bg-black"
+                  />
                 ) : selectedImage ? (
                   <div className="relative">
                     <img
@@ -271,7 +270,12 @@ export const Predict = () => {
               </Button>
             )}
 
-            {latestDetection && <DetectionCard {...latestDetection} />}
+            {latestDetection && (
+              <>
+                <DetectionCard {...latestDetection} />
+                <PestInfoTabs pestName={latestDetection.pestName} />
+              </>
+            )}
           </div>
 
           <Card className="p-4">
