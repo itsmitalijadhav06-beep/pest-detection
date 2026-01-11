@@ -1,5 +1,4 @@
 # Core ML
-python-3.10.0
 tensorflow==2.10.0
 numpy==1.26.4
 pillow
