@@ -12,6 +12,9 @@ from bson import ObjectId
 
 from config.db import predictions_collection as prediction_collection
 from middleware.auth_middleware import get_current_user
+from utils.model_loader import load_model
+
+model = load_model()
 
 # =========================
 # Security & Router
@@ -36,8 +39,6 @@ if not os.path.exists(MODEL_PATH):
     with open(MODEL_PATH, "wb") as f:
         f.write(response.content)
 
-model = tf.keras.models.load_model(MODEL_PATH)
-print("✅ Model loaded successfully")
 
 # =========================
 # Class Names
