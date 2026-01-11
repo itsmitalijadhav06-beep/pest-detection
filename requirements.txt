@@ -21,3 +21,4 @@ motor
 passlib[bcrypt]
 python-jose
 werkzeug
+email-validator
