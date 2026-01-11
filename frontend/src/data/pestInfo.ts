@@ -97,5 +97,29 @@ export const pestInfoMap: Record<string, any> = {
         "Do NOT spray pesticides early in the season"
       ]
     }
+  },
+  "rice stem borer": {
+  crop: "Rice",
+  damage: [
+    "Larvae bore into stems and feed internally",
+    "Deadheart symptoms at vegetative stage",
+    "Whiteheads at flowering stage",
+    "Severe infestation leads to heavy yield loss"
+  ],
+  recommendations: {
+    cultural: [
+      "Use resistant or tolerant rice varieties",
+      "Remove and destroy stubbles after harvest",
+      "Avoid excessive nitrogen fertilizer",
+      "Synchronize planting time"
+    ],
+    biological: [
+      "Release Trichogramma parasitoids",
+      "Conserve natural enemies like spiders and parasitoids"
+    ],
+    chemical: [
+      "Apply recommended insecticides only when economic threshold level is crossed"
+    ]
   }
+}
 };
