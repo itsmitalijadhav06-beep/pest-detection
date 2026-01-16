@@ -1,5 +1,5 @@
 # Core ML
-tensorflow==2.10.0
+tensorflow-cpu==2.10.0
 numpy==1.26.4
 pillow
 h5py==3.7.0
