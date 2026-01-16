@@ -1,10 +1,4 @@
-# Core ML
-tensorflow-cpu==2.10.0
-numpy==1.26.4
-pillow
-h5py==3.7.0
-
-# FastAPI server
+ FastAPI server
 fastapi==0.95.2
 uvicorn[standard]==0.22.0
 pydantic==1.10.13
