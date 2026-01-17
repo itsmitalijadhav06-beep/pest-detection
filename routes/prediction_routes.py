@@ -22,7 +22,7 @@ router = APIRouter(
 # =========================
 # Hugging Face Config
 # =========================
-HF_API_URL = "https://router.huggingface.co/hf-inference/models/Mitali06/pest-detection-model"
+HF_API_URL = "https://huggingface.co/Mitali06/pest-detection-model/blob/main/pest_inception_transfer.h5"
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 HEADERS = {
