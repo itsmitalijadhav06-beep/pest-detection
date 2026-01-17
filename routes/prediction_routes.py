@@ -1,20 +1,13 @@
-from fastapi import APIRouter, File, UploadFile, Depends
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from datetime import datetime
-from PIL import Image
-import numpy as np
-import tensorflow as tf
-import io
 import base64
 import os
 import requests
 from bson import ObjectId
 
-from config.db import predictions_collection as prediction_collection
+from config.db import predictions_collection
 from middleware.auth_middleware import get_current_user
-from utils.model_loader import load_model
-
-model = load_model()
 
 # =========================
 # Security & Router
@@ -27,29 +20,15 @@ router = APIRouter(
 )
 
 # =========================
-# MODEL LOAD (HUGGING FACE)
+# Hugging Face Config
 # =========================
-MODEL_PATH = "pest_inception_transfer.h5"
-MODEL_URL = os.getenv("https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.h5")  # set in Render env
+HF_API_URL = "https://router.huggingface.co/hf-inference/models/Mitali06/pest-detection-model"
+HF_TOKEN = os.getenv("HF_TOKEN")
 
-if not os.path.exists(MODEL_PATH):
-    print("⬇️ Downloading model from Hugging Face...")
-    response = requests.get(MODEL_URL)
-    response.raise_for_status()
-    with open(MODEL_PATH, "wb") as f:
-        f.write(response.content)
-
-
-# =========================
-# Class Names
-# =========================
-CLASS_NAMES = [
-    "green_leafhopper",
-    "planthopper",
-    "rice_bug",
-    "rice_leaf_roller",
-    "rice_stem_borer"
-]
+HEADERS = {
+    "Authorization": f"Bearer {HF_TOKEN}",
+    "Content-Type": "application/octet-stream"
+}
 
 # =========================
 # Risk Mapping
@@ -73,29 +52,34 @@ async def predict_and_save(
     file: UploadFile = File(...),
     user_id: str = Depends(get_current_user)
 ):
-    # Read image bytes
     image_bytes = await file.read()
 
-    # Convert image to base64 (for frontend display)
+    # Base64 for frontend preview
     image_base64 = base64.b64encode(image_bytes).decode("utf-8")
     image_url = f"data:{file.content_type};base64,{image_base64}"
 
-    # Preprocess image
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    image = image.resize((299, 299))
+    # Send image directly to Hugging Face
+    response = requests.post(
+        HF_API_URL,
+        headers=HEADERS,
+        data=image_bytes,
+        timeout=60
+    )
 
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=500,
+            detail=response.text
+        )
 
-    # Predict
-    preds = model.predict(img_array)
-    idx = int(np.argmax(preds))
-    confidence = float(np.max(preds))  # 0–1
+    result = response.json()
 
-    pest_name = CLASS_NAMES[idx]
+    # Example HF output: [{'label': 'rice_bug', 'score': 0.87}]
+    top_prediction = max(result, key=lambda x: x["score"])
+    pest_name = top_prediction["label"]
+    confidence = float(top_prediction["score"])
     risk = get_risk_level(pest_name)
 
-    # Save to MongoDB
     doc = {
         "userId": ObjectId(user_id),
         "pestName": pest_name,
@@ -105,14 +89,13 @@ async def predict_and_save(
         "createdAt": datetime.utcnow()
     }
 
-    result = prediction_collection.insert_one(doc)
+    inserted = predictions_collection.insert_one(doc)
 
-    # Response
     return {
-        "_id": str(result.inserted_id),
-        "pestName": doc["pestName"],
-        "confidence": doc["confidence"],
-        "risk": doc["risk"],
-        "imageUrl": doc["imageUrl"],
+        "_id": str(inserted.inserted_id),
+        "pestName": pest_name,
+        "confidence": confidence,
+        "risk": risk,
+        "imageUrl": image_url,
         "createdAt": doc["createdAt"].isoformat()
     }

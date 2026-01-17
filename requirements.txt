@@ -1,4 +1,9 @@
- FastAPI server
+# Core ML
+tensorflow==2.10.0
+numpy==1.26.4
+pillow
+
+# FastAPI 
 fastapi==0.95.2
 uvicorn[standard]==0.22.0
 pydantic==1.10.13
