@@ -5,7 +5,7 @@ import tensorflow as tf
 MODEL_PATH = "pest_inception_transfer.h5"
 MODEL_URL = os.getenv(
     "MODEL_URL",
-    "https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.h5"
+    "https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.tflite"
 )
 
 _model = None  # cache
