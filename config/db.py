@@ -8,7 +8,7 @@ if not MONGO_URI:
 
 client = MongoClient(MONGO_URI)
 
-db = client["pest-detection"]
+db = client["pestguard"]
 
 users_collection = db["users"]
 predictions_collection = db["predictions"]
