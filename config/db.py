@@ -14,7 +14,7 @@ client = MongoClient(
 )
 
 
-db = client["pestguard"]
+db = client["pest-detection"]
 
 users_collection = db["users"]
 predictions_collection = db["predictions"]
