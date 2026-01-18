@@ -2,16 +2,15 @@ from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from datetime import datetime
 import base64
-import os
-import requests
+import numpy as np
+from PIL import Image
+from io import BytesIO
 from bson import ObjectId
 
 from config.db import predictions_collection
 from middleware.auth_middleware import get_current_user
+from utils.model_loader import get_model
 
-# =========================
-# Security & Router
-# =========================
 security = HTTPBearer()
 
 router = APIRouter(
@@ -19,20 +18,16 @@ router = APIRouter(
     dependencies=[Depends(security)]
 )
 
-# =========================
-# Hugging Face Config
-# =========================
-HF_API_URL = "https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.h5"
-HF_TOKEN = os.getenv("HF_TOKEN")
+model = get_model()
 
-HEADERS = {
-    "Authorization": f"Bearer {HF_TOKEN}",
-    "Content-Type": "application/octet-stream"
-}
+PEST_CLASSES = [
+    "rice_stem_borer",
+    "rice_leaf_roller",
+    "planthopper",
+    "green_leafhopper",
+    "rice_bug"
+]
 
-# =========================
-# Risk Mapping
-# =========================
 PEST_RISK_MAP = {
     "rice_stem_borer": "high",
     "rice_leaf_roller": "high",
@@ -41,12 +36,6 @@ PEST_RISK_MAP = {
     "rice_bug": "low"
 }
 
-def get_risk_level(pest_name: str) -> str:
-    return PEST_RISK_MAP.get(pest_name, "low")
-
-# =========================
-# Prediction Endpoint
-# =========================
 @router.post("/predict")
 async def predict_and_save(
     file: UploadFile = File(...),
@@ -54,31 +43,22 @@ async def predict_and_save(
 ):
     image_bytes = await file.read()
 
-    # Base64 for frontend preview
-    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+    # base64 preview
+    image_base64 = base64.b64encode(image_bytes).decode()
     image_url = f"data:{file.content_type};base64,{image_base64}"
 
-    # Send image directly to Hugging Face
-    response = requests.post(
-        HF_API_URL,
-        headers=HEADERS,
-        data=image_bytes,
-        timeout=60
-    )
+    # preprocess image
+    image = Image.open(BytesIO(image_bytes)).convert("RGB")
+    image = image.resize((224, 224))
+    image_array = np.array(image) / 255.0
+    image_array = np.expand_dims(image_array, axis=0)
 
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=500,
-            detail=response.text
-        )
+    preds = model.predict(image_array)[0]
+    idx = int(np.argmax(preds))
 
-    result = response.json()
-
-    # Example HF output: [{'label': 'rice_bug', 'score': 0.87}]
-    top_prediction = max(result, key=lambda x: x["score"])
-    pest_name = top_prediction["label"]
-    confidence = float(top_prediction["score"])
-    risk = get_risk_level(pest_name)
+    pest_name = PEST_CLASSES[idx]
+    confidence = float(preds[idx])
+    risk = PEST_RISK_MAP.get(pest_name, "low")
 
     doc = {
         "userId": ObjectId(user_id),
