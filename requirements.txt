@@ -12,9 +12,13 @@ python-multipart
 # Environment
 python-dotenv
 
+
 # Database
 pymongo
 motor
+pymongo>=4.7
+dnspython
+
 
 # Auth & Security
 passlib[bcrypt]
