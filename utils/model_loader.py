@@ -8,15 +8,22 @@ MODEL_URL = os.getenv(
     "https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.h5"
 )
 
-def load_model():
-    if not os.path.exists(MODEL_PATH):
-        print("⬇️ Downloading model from Hugging Face...")
-        response = requests.get(MODEL_URL, stream=True)
-        response.raise_for_status()
+_model = None  # cache
 
-        with open(MODEL_PATH, "wb") as f:
-            for chunk in response.iter_content(chunk_size=1024 * 1024):
-                f.write(chunk)
+def get_model():
+    global _model
 
-    print("✅ Model loaded")
-    return tf.keras.models.load_model(MODEL_PATH)
+    if _model is None:
+        if not os.path.exists(MODEL_PATH):
+            print("⬇️ Downloading model from Hugging Face...")
+            response = requests.get(MODEL_URL, stream=True)
+            response.raise_for_status()
+
+            with open(MODEL_PATH, "wb") as f:
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    f.write(chunk)
+
+        print("✅ Loading model into memory...")
+        _model = tf.keras.models.load_model(MODEL_PATH)
+
+    return _model
