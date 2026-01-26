@@ -1,17 +1,19 @@
 from config.db import predictions_collection
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
+
+from routes.prediction_routes import IST
 
 
 # =========================
 # Risk Helper (CLASS BASED)
 # =========================
 PEST_RISK_MAP = {
-    "rice_stem_borer": "high",
-    "rice_leaf_roller": "high",
-    "planthopper": "medium",
     "green_leafhopper": "medium",
-    "rice_bug": "low"
+    "planthopper": "medium",
+    "rice_bug": "low",
+    "rice_leaf_roller": "high",
+    "rice_stem_borer": "high"
 }
 
 def get_risk_level(pest_name: str) -> str:
@@ -38,7 +40,7 @@ class PredictionModel:
             "pestName": pest_name,
             "confidence": confidence,
             "risk": risk,                     # 🔥 REQUIRED for analytics
-            "createdAt": datetime.utcnow()
+            "createdAt": datetime.now(timezone.utc)
         }
 
         predictions_collection.insert_one(prediction)

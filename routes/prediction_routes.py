@@ -10,6 +10,9 @@ from bson import ObjectId
 from config.db import predictions_collection
 from middleware.auth_middleware import get_current_user
 from utils.model_loader import get_model
+from datetime import datetime, timezone
+import pytz
+
 
 security = HTTPBearer()
 
@@ -21,19 +24,19 @@ router = APIRouter(
 model = get_model()
 
 PEST_CLASSES = [
-    "rice_stem_borer",
-    "rice_leaf_roller",
-    "planthopper",
     "green_leafhopper",
-    "rice_bug"
+    "planthopper",
+    "rice_bug",
+    "rice_leaf_roller",
+    "rice_stem_borer"
 ]
 
 PEST_RISK_MAP = {
-    "rice_stem_borer": "high",
-    "rice_leaf_roller": "high",
-    "planthopper": "medium",
     "green_leafhopper": "medium",
-    "rice_bug": "low"
+    "planthopper": "medium",
+    "rice_bug": "low",
+    "rice_leaf_roller": "high",
+    "rice_stem_borer": "high",
 }
 
 @router.post("/predict")
@@ -41,41 +44,60 @@ async def predict_and_save(
     file: UploadFile = File(...),
     user_id: str = Depends(get_current_user)
 ):
-    image_bytes = await file.read()
+    try:
+        # 🔒 Read image safely
+        image_bytes = await file.read()
+        if not image_bytes:
+            raise HTTPException(status_code=400, detail="Empty image file")
 
-    # base64 preview
-    image_base64 = base64.b64encode(image_bytes).decode()
-    image_url = f"data:{file.content_type};base64,{image_base64}"
+        # 🖼️ base64 preview
+        image_base64 = base64.b64encode(image_bytes).decode()
+        image_url = f"data:{file.content_type};base64,{image_base64}"
 
-    # preprocess image
-    image = Image.open(BytesIO(image_bytes)).convert("RGB")
-    image = image.resize((224, 224))
-    image_array = np.array(image) / 255.0
-    image_array = np.expand_dims(image_array, axis=0)
+        # 🧠 preprocess
+        try:
+            image = Image.open(BytesIO(image_bytes)).convert("RGB")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid image file")
 
-    preds = model.predict(image_array)[0]
-    idx = int(np.argmax(preds))
+        image = image.resize((299, 299))
+        image_array = np.array(image) / 255.0
+        image_array = np.expand_dims(image_array, axis=0)
 
-    pest_name = PEST_CLASSES[idx]
-    confidence = float(preds[idx])
-    risk = PEST_RISK_MAP.get(pest_name, "low")
+        # 🔮 predict
+        preds = model.predict(image_array)[0]
+        idx = int(np.argmax(preds))
 
-    doc = {
-        "userId": ObjectId(user_id),
-        "pestName": pest_name,
-        "confidence": confidence,
-        "risk": risk,
-        "imageUrl": image_url,
-        "createdAt": datetime.utcnow()
-    }
+        pest_name = PEST_CLASSES[idx]
+        confidence = float(preds[idx])
+        risk = PEST_RISK_MAP.get(pest_name, "low")
 
-    inserted = predictions_collection.insert_one(doc)
+        # 📦 Mongo document
+        doc = {
+            "userId": ObjectId(user_id) if isinstance(user_id, str) else user_id,
+            "pestName": pest_name,
+            "confidence": confidence,
+            "risk": risk,
+            "imageUrl": image_url,
+            "createdAt": datetime.now(timezone.utc)
 
-    return {
-        "_id": str(inserted.inserted_id),
-        "pestName": pest_name,
-        "confidence": confidence,
-        "risk": risk,
-        "imageUrl": image_url,
-        "createdAt": doc["createdAt"].isoformat()
-    }
+        }
+
+        inserted = predictions_collection.insert_one(doc)
+
+        # ✅ RETURN RESPONSE (THIS WAS MISSING)
+        return {
+            "_id": str(inserted.inserted_id),
+            "userId": str(doc["userId"]),
+            "pestName": pest_name,
+            "confidence": confidence,
+            "risk": risk,
+            "imageUrl": image_url,
+            "createdAt": doc["createdAt"].isoformat()
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("❌ Predict error:", e)
+        raise HTTPException(status_code=500, detail="Prediction failed")

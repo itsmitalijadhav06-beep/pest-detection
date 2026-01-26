@@ -8,7 +8,6 @@ import os
 security = HTTPBearer()
 
 router = APIRouter(
-    prefix="/api/alerts",
     tags=["Alerts"],
     dependencies=[Depends(security)]
 )

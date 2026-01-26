@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DetectionCard } from '@/components/DetectionCard';
+import { PestInfoTabs } from '@/components/PestInfoTabs'; // ✅ ALREADY EXISTS
 import { useToast } from '@/hooks/use-toast';
 import { predictApi, alertApi, analyticsApi } from '@/lib/api';
 
@@ -16,12 +17,25 @@ interface Detection {
   timestamp: string;
   imageUrl?: string;
 }
+const formatIST = (date: string | Date) =>
+  new Date(
+    typeof date === 'string' ? date + 'Z' : date.toISOString()
+  ).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
 
 export const Live = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
   const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
+  const [latestDetection, setLatestDetection] = useState<Detection | null>(null); // ✅ NEW
   const [captureCount, setCaptureCount] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
 
@@ -41,7 +55,7 @@ export const Live = () => {
         pestName: d.pestName,
         confidence: d.confidence * 100,
         risk: d.risk,
-        timestamp: new Date(d.createdAt).toLocaleString(),
+        timestamp: formatIST(d.createdAt),
         imageUrl: d.imageUrl,
       }));
       setRecentDetections(mapped);
@@ -49,10 +63,6 @@ export const Live = () => {
       console.warn('Failed to load recent detections');
     }
   };
-
-  /* =========================
-     ALWAYS SYNC FROM MONGODB
-  ========================= */
 
   useEffect(() => {
     fetchRecentFromDB();
@@ -133,10 +143,11 @@ export const Live = () => {
           pestName: res.data.pestName,
           confidence: res.data.confidence * 100,
           risk: res.data.risk,
-          timestamp: new Date(res.data.createdAt).toLocaleString(),
+          timestamp: formatIST(new Date()),
           imageUrl: canvas.toDataURL('image/jpeg'),
         };
 
+        setLatestDetection(detection); // ✅ FOR TAB BELOW
         setRecentDetections((prev) => [detection, ...prev].slice(0, 3));
         setCaptureCount((c) => c + 1);
 
@@ -177,7 +188,7 @@ export const Live = () => {
   }, []);
 
   /* =========================
-     UI (UNCHANGED)
+     UI
   ========================= */
 
   return (
@@ -249,6 +260,21 @@ export const Live = () => {
                   Camera Off
                 </Button>
               </div>
+
+              {/* ✅ LATEST DETECTION + INFO & RECOMMENDATION */}
+              {latestDetection && (
+                <Card className="mx-4 mb-4">
+                  <div className="p-4 space-y-4">
+                    <h3 className="font-semibold text-sm">
+                      Latest Detection
+                    </h3>
+
+                    <DetectionCard {...latestDetection} />
+
+                    <PestInfoTabs pestName={latestDetection.pestName} />
+                  </div>
+                </Card>
+              )}
             </Card>
           </div>
 

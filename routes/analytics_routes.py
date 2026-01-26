@@ -8,7 +8,6 @@ from middleware.auth_middleware import get_current_user
 security = HTTPBearer()
 
 router = APIRouter(
-    prefix="/api/analytics",
     tags=["Analytics"],
     dependencies=[Depends(security)]
 )
@@ -102,7 +101,7 @@ def recent_predictions(user_id: str = Depends(get_current_user)):
             "pestName": d.get("pestName"),
             "confidence": d.get("confidence"),
             "risk": d.get("risk"),
-            "createdAt": d.get("createdAt"),
+            "createdAt": d.get("createdAt").isoformat(),
             "imageUrl": d.get("imageUrl")
         }
         for d in data

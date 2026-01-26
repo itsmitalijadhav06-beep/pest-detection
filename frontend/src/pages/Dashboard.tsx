@@ -32,6 +32,19 @@ import {
 
 /* ================= TYPES ================= */
 
+const formatIST = (date: string | Date) =>
+  new Date(
+    typeof date === 'string' ? date + 'Z' : date.toISOString()
+  ).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
 interface Stats {
   total: number;
   high: number;
@@ -118,7 +131,7 @@ export const Dashboard = () => {
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
   /* ================= FETCH ================= */
-
+  
   const fetchData = async () => {
   try {
     const [
@@ -152,7 +165,7 @@ export const Dashboard = () => {
     pestName: d.pestName,
     confidence: d.confidence <= 1 ? d.confidence * 100 : d.confidence,
     risk: d.risk, // ✅ PASS BACKEND VALUE
-    timestamp: new Date(d.createdAt).toLocaleString(),
+    timestamp: formatIST(d.createdAt),
     imageUrl: d.imageUrl,
   }))
 );

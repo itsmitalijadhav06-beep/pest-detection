@@ -17,6 +17,23 @@ interface Detection {
   imageUrl?: string;
 }
 
+/* ===============================
+   IST FORMATTER (SINGLE SOURCE)
+=============================== */
+const formatIST = (date: string | Date) =>
+  new Date(
+    typeof date === 'string' ? date + 'Z' : date.toISOString()
+  ).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+
 export const Predict = () => {
   const [activeTab, setActiveTab] = useState<'camera' | 'upload'>('upload');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -54,7 +71,7 @@ export const Predict = () => {
           confidence: d.confidence * 100,
           risk: d.risk,
           imageUrl: d.imageUrl,
-          timestamp: new Date(d.createdAt).toLocaleString(),
+          timestamp: formatIST(d.createdAt),
         }))
       );
     } catch {
@@ -135,7 +152,8 @@ export const Predict = () => {
         pestName: res.data.pestName,
         confidence: confidencePercent,
         risk: res.data.risk,
-        timestamp: new Date(res.data.createdAt).toLocaleString(),
+        timestamp: formatIST(new Date()),
+        imageUrl: res.data.imageUrl,
       };
 
       setLatestDetection(detection);
@@ -149,13 +167,17 @@ export const Predict = () => {
 
         toast({
           title: '⚠️ High Risk Detected',
-          description: `${res.data.pestName} detected (${confidencePercent}%)`,
+          description: `${res.data.pestName} detected (${confidencePercent.toFixed(
+            1
+          )}%)`,
           variant: 'destructive',
         });
       } else {
         toast({
           title: 'Detection successful',
-          description: `${res.data.pestName} detected (${confidencePercent}%)`,
+          description: `${res.data.pestName} detected (${confidencePercent.toFixed(
+            1
+          )}%)`,
         });
       }
     } catch (err: any) {
@@ -265,7 +287,11 @@ export const Predict = () => {
             </Card>
 
             {selectedImage && (
-              <Button className="w-full" onClick={handlePredict} disabled={loading}>
+              <Button
+                className="w-full"
+                onClick={handlePredict}
+                disabled={loading}
+              >
                 {loading ? 'Analyzing…' : 'Analyze Image'}
               </Button>
             )}

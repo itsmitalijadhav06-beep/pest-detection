@@ -2,10 +2,10 @@ import os
 import requests
 import tensorflow as tf
 
-MODEL_PATH = "pest_inception_transfer.tflite"
+MODEL_PATH = "pest_inception_transfer.h5"
 MODEL_URL = os.getenv(
     "MODEL_URL",
-    "https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.tflite"
+    "https://huggingface.co/Mitali06/pest-detection-model/resolve/main/pest_inception_transfer.h5"
 )
 
 _model = None  # cache
