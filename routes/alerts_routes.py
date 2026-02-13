@@ -19,20 +19,45 @@ def send_email_alert(
 ):
     pest_name = data.get("pest_name")
     confidence = data.get("confidence")
+    language = data.get("language", "en")  # ✅ NEW
 
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASSWORD")
     receiver = sender  # or farmer email from DB
 
-    subject = "🚨 PestGuard Alert: High Risk Pest Detected"
-    body = f"""
-    ⚠️ High Risk Pest Detected!
+    # ✅ LANGUAGE SWITCH
+    if language == "hi":
+        subject = "🚨 PestGuard चेतावनी: उच्च जोखिम कीट पाया गया"
+        body = f"""
+        ⚠️ उच्च जोखिम कीट पाया गया!
 
-    Pest: {pest_name}
-    Confidence: {confidence}%
+        कीट: {pest_name}
+        विश्वास स्तर: {confidence}%
 
-    Immediate action is recommended.
-    """
+        कृपया तुरंत कार्रवाई करें।
+        """
+
+    elif language == "mr":
+        subject = "🚨 PestGuard सूचना: उच्च जोखीम कीड आढळली"
+        body = f"""
+        ⚠️ उच्च जोखीम कीड आढळली!
+
+        कीड: {pest_name}
+        विश्वास पातळी: {confidence}%
+
+        कृपया त्वरित उपाययोजना करा.
+        """
+
+    else:  # default English
+        subject = "🚨 PestGuard Alert: High Risk Pest Detected"
+        body = f"""
+        ⚠️ High Risk Pest Detected!
+
+        Pest: {pest_name}
+        Confidence: {confidence}%
+
+        Immediate action is recommended.
+        """
 
     msg = MIMEText(body)
     msg["Subject"] = subject

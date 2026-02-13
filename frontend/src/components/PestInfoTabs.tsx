@@ -4,9 +4,10 @@ import { pestInfoMap } from "@/data/pestInfo";
 
 interface Props {
   pestName: string;
+  language: "en" | "hi" | "mr";
 }
 
-export const PestInfoTabs = ({ pestName }: Props) => {
+export const PestInfoTabs = ({ pestName, language }: Props) => {
   const [tab, setTab] = useState<"info" | "recommendation">("info");
 
   const normalize = (name: string) =>
@@ -17,7 +18,41 @@ export const PestInfoTabs = ({ pestName }: Props) => {
       .trim();
 
   const pestKey = normalize(pestName);
-  const data = pestInfoMap[pestKey];
+
+  // Safe fallback to English if language is undefined or missing
+  const data =
+    pestInfoMap[pestKey]?.[language] ??
+    pestInfoMap[pestKey]?.["en"];
+
+  const labels = {
+    en: {
+      info: "Information",
+      rec: "Recommendations",
+      crop: "Crop Affected:",
+      cultural: "Cultural Methods",
+      biological: "Biological Control",
+      chemical: "Chemical Control",
+      unavailable: "Information will be available for this pest soon."
+    },
+    hi: {
+      info: "जानकारी",
+      rec: "सिफारिशें",
+      crop: "प्रभावित फसल:",
+      cultural: "सांस्कृतिक उपाय",
+      biological: "जैविक नियंत्रण",
+      chemical: "रासायनिक नियंत्रण",
+      unavailable: "इस कीट के लिए जानकारी जल्द उपलब्ध होगी।"
+    },
+    mr: {
+      info: "माहिती",
+      rec: "शिफारसी",
+      crop: "प्रभावित पीक:",
+      cultural: "सांस्कृतिक पद्धती",
+      biological: "जैविक नियंत्रण",
+      chemical: "रासायनिक नियंत्रण",
+      unavailable: "या कीटकासाठी माहिती लवकरच उपलब्ध होईल."
+    }
+  };
 
   return (
     <Card className="p-4 mt-4">
@@ -29,7 +64,7 @@ export const PestInfoTabs = ({ pestName }: Props) => {
             tab === "info" ? "font-semibold border-b-2 border-primary" : ""
           }`}
         >
-          Information
+          {labels[language].info}
         </button>
 
         <button
@@ -40,19 +75,19 @@ export const PestInfoTabs = ({ pestName }: Props) => {
               : ""
           }`}
         >
-          Recommendations
+          {labels[language].rec}
         </button>
       </div>
 
       {/* CONTENT */}
       {!data ? (
         <p className="text-sm text-muted-foreground">
-          Information will be available for this pest soon.
+          {labels[language].unavailable}
         </p>
       ) : tab === "info" ? (
         <>
           <p className="font-medium mb-2">
-            Crop Affected: {data.crop}
+            {labels[language].crop} {data.crop}
           </p>
           <ul className="list-disc pl-5 text-sm space-y-1">
             {data.damage.map((d: string, i: number) => (
@@ -63,7 +98,9 @@ export const PestInfoTabs = ({ pestName }: Props) => {
       ) : (
         <div className="space-y-3 text-sm">
           <div>
-            <p className="font-medium">Cultural Methods</p>
+            <p className="font-medium">
+              {labels[language].cultural}
+            </p>
             <ul className="list-disc pl-5">
               {data.recommendations.cultural.map((c: string, i: number) => (
                 <li key={i}>{c}</li>
@@ -72,7 +109,9 @@ export const PestInfoTabs = ({ pestName }: Props) => {
           </div>
 
           <div>
-            <p className="font-medium">Biological Control</p>
+            <p className="font-medium">
+              {labels[language].biological}
+            </p>
             <ul className="list-disc pl-5">
               {data.recommendations.biological.map((b: string, i: number) => (
                 <li key={i}>{b}</li>
@@ -81,7 +120,9 @@ export const PestInfoTabs = ({ pestName }: Props) => {
           </div>
 
           <div>
-            <p className="font-medium">Chemical Control</p>
+            <p className="font-medium">
+              {labels[language].chemical}
+            </p>
             <ul className="list-disc pl-5">
               {data.recommendations.chemical.map((c: string, i: number) => (
                 <li key={i}>{c}</li>

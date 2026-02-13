@@ -38,6 +38,4 @@ app.include_router(alerts_router, prefix="/api/alerts")
 def home():
     return {"message": "Pest Detection API is running"}
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+

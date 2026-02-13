@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Camera,
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+  // ✅ added
 
 const languages = [
   { code: 'en', name: 'English', label: 'English' },
@@ -26,13 +28,14 @@ const languages = [
 export const Navbar = () => {
   const location = useLocation();
   const [language, setLanguage] = useState('en');
-  const { logout } = useAuth(); // 👈 SIGN OUT LOGIC
+  const { logout } = useAuth();
+  const { t, i18n } = useTranslation();   // ✅ added
 
   const navItems = [
-    { path: '/predict', label: 'Predict', icon: Camera },
-    { path: '/live', label: 'Live', icon: Radio },
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  ];
+  { path: '/predict', label: t("predict"), icon: Camera },
+  { path: '/live', label: t("live"), icon: Radio },
+  { path: '/dashboard', label: t("dashboard"), icon: LayoutDashboard },
+];
 
   const currentLang = languages.find((l) => l.code === language);
 
@@ -48,7 +51,7 @@ export const Navbar = () => {
           <div className="flex flex-col">
             <span className="text-lg font-bold">PestGuard</span>
             <span className="text-xs text-muted-foreground">
-              AI-Powered Detection
+              {t("aiPestDetection")}
             </span>
           </div>
         </Link>
@@ -84,7 +87,10 @@ export const Navbar = () => {
               {languages.map((lang) => (
                 <DropdownMenuItem
                   key={lang.code}
-                  onClick={() => setLanguage(lang.code)}
+                  onClick={() => {
+                    setLanguage(lang.code);
+                    i18n.changeLanguage(lang.code);  // ✅ ONLY FIX
+                  }}
                 >
                   {lang.name}
                 </DropdownMenuItem>
@@ -100,7 +106,7 @@ export const Navbar = () => {
             className="gap-2 ml-2 text-destructive hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <span className="hidden sm:inline">{t("signOut")}</span>
           </Button>
         </nav>
       </div>

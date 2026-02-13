@@ -55,5 +55,20 @@
   "detectionSuccessDesc": "{{pestName}} आढळले ({{confidence}}%)",
   "highRiskDetectedDesc": "{{pestName}} आढळले ({{confidence}}%)",
   "predictionFailed": "भाकीत अयशस्वी",
-  "serverError": "सर्व्हर त्रुटी"
+  "serverError": "सर्व्हर त्रुटी",
+  "predict": "भाकीत",
+"live": "लाईव्ह",
+"dashboard": "डॅशबोर्ड",
+"signOut": "साइन आउट",
+"monthlySummary": "मासिक कीड ओळख सारांश",
+"annualTrend": "वार्षिक कीड ओळख प्रवृत्ती",
+"dailyAnalysis": "दैनिक कीड विश्लेषण",
+"dailyAnalysisDesc": "आज आढळलेल्या कीटकांचे वितरण",
+"quickRecommendations": "त्वरित शिफारसी",
+"recommendationDesc": "कीड व्यवस्थापनासाठी मार्गदर्शन",
+"rec1": "प्रभावित पिकांची त्वरित तपासणी करा",
+"rec2": "शिफारस केलेली कीड नियंत्रण उपाय लागू करा",
+"rec3": "पिकांची स्थिती दररोज तपासा",
+"rec4": "योग्य सिंचन आणि शेत स्वच्छता राखा",
+"rec5": "संक्रमण वाढल्यास कृषी तज्ज्ञांचा सल्ला घ्या"
 }

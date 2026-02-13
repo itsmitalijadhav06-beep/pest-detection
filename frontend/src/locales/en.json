@@ -55,5 +55,20 @@
   "detectionSuccessDesc": "{{pestName}} detected ({{confidence}}%)",
   "highRiskDetectedDesc": "{{pestName}} detected ({{confidence}}%)",
   "predictionFailed": "Prediction failed",
-  "serverError": "Server error"
+  "serverError": "Server error",
+  "predict": "Predict",
+"live": "Live",
+"dashboard": "Dashboard",
+"signOut": "Sign Out",
+"monthlySummary": "Monthly Pest Detection Summary",
+"annualTrend": "Annual Pest Detection Trend",
+"dailyAnalysis": "Daily Pest Analysis",
+"dailyAnalysisDesc": "Distribution of pests detected today",
+"quickRecommendations": "Quick Recommendations",
+"recommendationDesc": "Actionable guidance for pest management",
+"rec1": "Inspect affected crops immediately",
+"rec2": "Apply recommended pest control measures",
+"rec3": "Monitor crop condition daily",
+"rec4": "Maintain proper irrigation & field hygiene",
+"rec5": "Consult an agricultural expert if spread increases"
 }

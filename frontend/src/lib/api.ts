@@ -62,8 +62,8 @@ export const analyticsApi = {
 
 // Alert API
 export const alertApi = {
-  sendEmail: (data: { pest_name: string; confidence: number }) =>
-    api.post('/api/alerts/email', data),
-};
+    sendEmail: (data: { pest_name: string; confidence: number; language?: string }) =>
+      api.post('/api/alerts/email', data),
+  };
 
 export default api;

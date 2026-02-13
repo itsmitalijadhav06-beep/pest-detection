@@ -17,6 +17,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { DetectionCard } from '@/components/DetectionCard';
 import { analyticsApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 import {
   BarChart,
@@ -56,7 +57,7 @@ interface Detection {
   id: string;
   pestName: string;
   confidence: number;
-  risk: 'high' | 'medium' | 'low'; // ✅ 
+  risk: 'high' | 'medium' | 'low';
   timestamp: string;
   imageUrl?: string;
 }
@@ -116,6 +117,7 @@ const StatCard = ({
 
 export const Dashboard = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -130,64 +132,60 @@ export const Dashboard = () => {
   const [pestCounts, setPestCounts] = useState<PestCount[]>([]);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
-  /* ================= FETCH ================= */
-  
   const fetchData = async () => {
-  try {
-    const [
-      statsRes,
-      monthlyRes,
-      yearlyRes,
-      recentRes,
-      dailyRes, // ✅ NEW
-    ] = await Promise.all([
-      analyticsApi.getStats(),
-      analyticsApi.getMonthly(),
-      analyticsApi.getYearly(),
-      analyticsApi.getRecent(),
-      analyticsApi.getdaily(), // ✅ FETCH DAILY
-    ]);
+    try {
+      const [
+        statsRes,
+        monthlyRes,
+        yearlyRes,
+        recentRes,
+        dailyRes,
+      ] = await Promise.all([
+        analyticsApi.getStats(),
+        analyticsApi.getMonthly(),
+        analyticsApi.getYearly(),
+        analyticsApi.getRecent(),
+        analyticsApi.getdaily(),
+      ]);
 
-    setStats(statsRes.data);
+      setStats(statsRes.data);
 
-    setMonthlyData(
-      monthlyRes.data.map((m: any) => ({
-        ...m,
-        monthLabel: formatMonth(m.month),
-      }))
-    );
+      setMonthlyData(
+        monthlyRes.data.map((m: any) => ({
+          ...m,
+          monthLabel: formatMonth(m.month),
+        }))
+      );
 
-    setYearlyData(yearlyRes.data);
+      setYearlyData(yearlyRes.data);
 
-    setRecentDetections(
-  recentRes.data.map((d: any) => ({
-    id: d._id,
-    pestName: d.pestName,
-    confidence: d.confidence <= 1 ? d.confidence * 100 : d.confidence,
-    risk: d.risk, // ✅ PASS BACKEND VALUE
-    timestamp: formatIST(d.createdAt),
-    imageUrl: d.imageUrl,
-  }))
-);
+      setRecentDetections(
+        recentRes.data.map((d: any) => ({
+          id: d._id,
+          pestName: d.pestName,
+          confidence: d.confidence <= 1 ? d.confidence * 100 : d.confidence,
+          risk: d.risk,
+          timestamp: formatIST(d.createdAt),
+          imageUrl: d.imageUrl,
+        }))
+      );
 
+      setPestCounts(
+        dailyRes.data.map((p: any) => ({
+          pestName: p.pestName,
+          count: p.count,
+        }))
+      );
 
-    // ✅ DAILY ANALYSIS FROM BACKEND
-    setPestCounts(
-      dailyRes.data.map((p: any) => ({
-        pestName: p.pestName,
-        count: p.count,
-      }))
-    );
-
-    setLastRefresh(new Date());
-  } catch {
-    toast({
-      title: "Error",
-      description: "Failed to load dashboard data",
-      variant: "destructive",
-    });
-  }
-};
+      setLastRefresh(new Date());
+    } catch {
+      toast({
+        title: t("dashboardError"),
+        description: t("dashboardErrorDesc"),
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -201,57 +199,52 @@ export const Dashboard = () => {
     <AppLayout>
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex gap-3 items-center">
             <Activity className="w-6 h-6 text-emerald-600" />
             <div>
-              <h1 className="text-2xl font-bold">Early Warning Dashboard</h1>
+              <h1 className="text-2xl font-bold">{t("dashboardTitle")}</h1>
               <p className="text-sm text-muted-foreground">
-                Real-time pest activity and risk assessment
+                {t("dashboardSubtitle")}
               </p>
             </div>
           </div>
 
           <Button size="sm" variant="outline" onClick={fetchData}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh ({lastRefresh.toLocaleTimeString()})
+            {t("refresh")} ({lastRefresh.toLocaleTimeString()})
           </Button>
         </div>
 
-        {/* Alert */}
         {hasHighRisk && (
           <Card className="p-4 bg-red-50 border border-red-200">
             <div className="flex items-center gap-3 text-red-600">
               <AlertTriangle />
               <div>
-                <p className="font-semibold">High Risk Alert</p>
+                <p className="font-semibold">{t("highRiskAlert")}</p>
                 <p className="text-sm">
-                  Immediate intervention recommended for detected pests
+                  {t("highRiskDesc")}
                 </p>
               </div>
             </div>
           </Card>
         )}
 
-        {/* Stats */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Detections" value={stats.total} subtitle="All time" icon={Bug} variant="primary" />
-          <StatCard title="High Risk" value={stats.high} subtitle="Immediate action" icon={AlertCircle} variant="destructive" />
-          <StatCard title="Medium Risk" value={stats.medium} subtitle="Close monitoring" icon={AlertTriangle} variant="warning" />
-          <StatCard title="Low Risk" value={stats.low} subtitle="Stable condition" icon={CheckCircle} variant="success" />
+          <StatCard title={t("totalDetections")} value={stats.total} subtitle={t("allTime")} icon={Bug} variant="primary" />
+          <StatCard title={t("highRisk")} value={stats.high} subtitle={t("immediateAttention")} icon={AlertCircle} variant="destructive" />
+          <StatCard title={t("mediumRisk")} value={stats.medium} subtitle={t("monitorClosely")} icon={AlertTriangle} variant="warning" />
+          <StatCard title={t("lowRisk")} value={stats.low} subtitle={t("underControl")} icon={CheckCircle} variant="success" />
         </div>
 
-        {/* Charts + Side */}
         <div className="grid lg:grid-cols-3 gap-6">
 
-          {/* Charts */}
           <div className="lg:col-span-2 space-y-6">
 
             <Card className="p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-emerald-600" />
-                Monthly Pest Detection Summary
+                {t("monthlySummary")}
               </h3>
 
               <div className="h-64">
@@ -270,7 +263,7 @@ export const Dashboard = () => {
             <Card className="p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-green-600" />
-                Annual Pest Detection Trend
+                {t("annualTrend")}
               </h3>
 
               <div className="h-64">
@@ -287,14 +280,12 @@ export const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Right Panel */}
           <div className="space-y-6">
 
-            {/* Recent */}
             <Card className="p-4">
               <div className="flex justify-between mb-4">
                 <h3 className="font-semibold flex gap-2 items-center">
-                  <Clock className="w-4 h-4" /> Recent Detections
+                  <Clock className="w-4 h-4" /> {t("recentDetections")}
                 </h3>
                 <span className="text-xs text-green-600 flex gap-1 items-center">
                   <span className="w-1.5 h-1.5 bg-green-600 rounded-full" /> Live
@@ -303,25 +294,23 @@ export const Dashboard = () => {
 
               <div className="space-y-3 max-h-[280px] overflow-y-auto">
                 {recentDetections.map(d => (
-  <DetectionCard
-    key={d.id}
-    pestName={d.pestName}
-    confidence={d.confidence}
-    risk={d.risk}          // ✅ REQUIRED
-    timestamp={d.timestamp}
-    imageUrl={d.imageUrl}
-    compact
-  />
-))
-}
+                  <DetectionCard
+                    key={d.id}
+                    pestName={d.pestName}
+                    confidence={d.confidence}
+                    risk={d.risk}
+                    timestamp={d.timestamp}
+                    imageUrl={d.imageUrl}
+                    compact
+                  />
+                ))}
               </div>
             </Card>
 
-            {/* Daily Pest Analysis */}
             <Card className="p-4">
-              <h3 className="font-semibold mb-3">Daily Pest Analysis</h3>
+              <h3 className="font-semibold mb-3">{t("dailyAnalysis")}</h3>
               <p className="text-xs text-muted-foreground mb-3">
-                Distribution of pests detected today
+                {t("dailyAnalysisDesc")}
               </p>
 
               <ul className="space-y-2 text-sm">
@@ -336,25 +325,24 @@ export const Dashboard = () => {
               </ul>
             </Card>
 
-            {/* Quick Recommendations */}
             <Card className="p-4 bg-emerald-900 text-white">
               <div className="flex items-center gap-2 mb-3">
                 <ShieldCheck className="w-5 h-5" />
                 <div>
-                  <h3 className="font-semibold">Quick Recommendations</h3>
+                  <h3 className="font-semibold">{t("quickRecommendations")}</h3>
                   <p className="text-xs opacity-80">
-                    Actionable guidance for pest management
+                    {t("recommendationDesc")}
                   </p>
                 </div>
               </div>
 
               <div className="bg-white text-emerald-900 rounded-lg p-4">
                 <ol className="text-sm space-y-2 list-decimal list-inside">
-                  <li>Inspect affected crops immediately</li>
-                  <li>Apply recommended pest control measures</li>
-                  <li>Monitor crop condition daily</li>
-                  <li>Maintain proper irrigation & field hygiene</li>
-                  <li>Consult an agricultural expert if spread increases</li>
+                  <li>{t("rec1")}</li>
+                  <li>{t("rec2")}</li>
+                  <li>{t("rec3")}</li>
+                  <li>{t("rec4")}</li>
+                  <li>{t("rec5")}</li>
                 </ol>
               </div>
             </Card>

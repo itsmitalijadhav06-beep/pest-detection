@@ -55,5 +55,21 @@
   "detectionSuccessDesc": "{{pestName}} पाया गया ({{confidence}}%)",
   "highRiskDetectedDesc": "{{pestName}} पाया गया ({{confidence}}%)",
   "predictionFailed": "प्रेडिक्शन विफल",
-  "serverError": "सर्वर त्रुटि"
+  "serverError": "सर्वर त्रुटि",
+  "predict": "पूर्वानुमान",
+"live": "लाइव",
+"dashboard": "डैशबोर्ड",
+"signOut": "साइन आउट",
+"monthlySummary": "मासिक कीट पहचान सारांश",
+"annualTrend": "वार्षिक कीट पहचान प्रवृत्ति",
+"dailyAnalysis": "दैनिक कीट विश्लेषण",
+"dailyAnalysisDesc": "आज पाए गए कीटों का वितरण",
+"quickRecommendations": "त्वरित सिफारिशें",
+"recommendationDesc": "कीट प्रबंधन के लिए मार्गदर्शन",
+"rec1": "प्रभावित फसलों का तुरंत निरीक्षण करें",
+"rec2": "अनुशंसित कीट नियंत्रण उपाय लागू करें",
+"rec3": "फसल की स्थिति का प्रतिदिन निरीक्षण करें",
+"rec4": "सिंचाई और खेत की स्वच्छता बनाए रखें",
+"rec5": "संक्रमण बढ़ने पर कृषि विशेषज्ञ से परामर्श करें"
+
 }

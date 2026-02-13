@@ -7,6 +7,8 @@ import { DetectionCard } from '@/components/DetectionCard';
 import { PestInfoTabs } from '@/components/PestInfoTabs';
 import { useToast } from '@/hooks/use-toast';
 import { predictApi, alertApi, analyticsApi } from '@/lib/api';
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 interface Detection {
   id: string;
@@ -33,8 +35,9 @@ const formatIST = (date: string | Date) =>
     hour12: true,
   });
 
-
 export const Predict = () => {
+  const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState<'camera' | 'upload'>('upload');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -47,9 +50,6 @@ export const Predict = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
 
-  /* ===============================
-     USERNAME
-  =============================== */
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   const username =
@@ -58,9 +58,6 @@ export const Predict = () => {
     storedUser?.user?.username ||
     'User';
 
-  /* ===============================
-     FETCH RECENT ACTIVITY
-  =============================== */
   const fetchRecentActivity = async () => {
     try {
       const res = await analyticsApi.getRecent();
@@ -83,17 +80,14 @@ export const Predict = () => {
     fetchRecentActivity();
   }, []);
 
-  /* ===============================
-     FILE HANDLING
-  =============================== */
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: 'File too large',
-        description: 'Please select an image under 10MB.',
+        title: t("fileTooLarge"),
+        description: t("fileTooLargeDesc"),
         variant: 'destructive',
       });
       return;
@@ -116,9 +110,31 @@ export const Predict = () => {
     reader.readAsDataURL(file);
   }, []);
 
-  /* ===============================
-     CAMERA
-  =============================== */
+  const captureImage = () => {
+    if (!videoRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+
+      setSelectedFile(file);
+      setSelectedImage(URL.createObjectURL(blob));
+      stopCamera();
+      setActiveTab('upload');
+    }, 'image/jpeg');
+  };
+
   const startCamera = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     if (videoRef.current) {
@@ -133,9 +149,6 @@ export const Predict = () => {
     setCameraActive(false);
   };
 
-  /* ===============================
-     PREDICT
-  =============================== */
   const handlePredict = async () => {
     if (!selectedFile) return;
     setLoading(true);
@@ -160,30 +173,34 @@ export const Predict = () => {
       await fetchRecentActivity();
 
       if (res.data.risk === 'high') {
-        await alertApi.sendEmail({
-          pest_name: res.data.pestName,
-          confidence: confidencePercent,
-        });
+
+await alertApi.sendEmail({
+  pest_name: res.data.pestName,
+  confidence: confidencePercent,
+  language: i18n.language, // 🔥 send current language
+});
 
         toast({
-          title: '⚠️ High Risk Detected',
-          description: `${res.data.pestName} detected (${confidencePercent.toFixed(
-            1
-          )}%)`,
+          title: t("highRiskDetected"),
+          description: t("highRiskDetectedDesc", {
+            pestName: res.data.pestName,
+            confidence: confidencePercent.toFixed(1),
+          }),
           variant: 'destructive',
         });
       } else {
         toast({
-          title: 'Detection successful',
-          description: `${res.data.pestName} detected (${confidencePercent.toFixed(
-            1
-          )}%)`,
+          title: t("detectionSuccess"),
+          description: t("detectionSuccessDesc", {
+            pestName: res.data.pestName,
+            confidence: confidencePercent.toFixed(1),
+          }),
         });
       }
     } catch (err: any) {
       toast({
-        title: 'Prediction failed',
-        description: err.message || 'Server error',
+        title: t("predictionFailed"),
+        description: err.message || t("serverError"),
         variant: 'destructive',
       });
     } finally {
@@ -197,23 +214,21 @@ export const Predict = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  /* ===============================
-     UI
-  =============================== */
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
             <Zap className="w-4 h-4" />
-            AI-Powered Pest Detection
+            {t("aiPestDetection")}
           </span>
 
           <h1 className="text-3xl font-bold">
-            Welcome back, {username} 👋
+            {t("identifyPestsTitle")}, {username} 👋
           </h1>
+
           <p className="text-muted-foreground mt-1">
-            Identify pests instantly
+            {t("identifyPestsTitle")}
           </p>
         </div>
 
@@ -228,8 +243,9 @@ export const Predict = () => {
                   startCamera();
                 }}
               >
-                <Camera className="mr-2 w-4 h-4" /> Camera
+                <Camera className="mr-2 w-4 h-4" /> {t("cameraTab")}
               </Button>
+
               <Button
                 className="flex-1"
                 variant={activeTab === 'upload' ? 'default' : 'outline'}
@@ -238,19 +254,25 @@ export const Predict = () => {
                   stopCamera();
                 }}
               >
-                <Upload className="mr-2 w-4 h-4" /> Upload
+                <Upload className="mr-2 w-4 h-4" /> {t("uploadTab")}
               </Button>
             </div>
 
             <Card onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
               <div className="p-6">
                 {activeTab === 'camera' ? (
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    className="rounded-lg max-h-80 mx-auto w-full bg-black"
-                  />
+                  <div className="space-y-4">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      className="rounded-lg max-h-80 mx-auto w-full bg-black"
+                    />
+
+                    <Button className="w-full" onClick={captureImage}>
+                      {t("capturePhoto")}
+                    </Button>
+                  </div>
                 ) : selectedImage ? (
                   <div className="relative">
                     <img
@@ -272,7 +294,7 @@ export const Predict = () => {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <ImageIcon className="w-10 h-10 mb-3" />
-                    <p>Click or drag image</p>
+                    <p>{t("clickOrDragImage")}</p>
                   </div>
                 )}
 
@@ -292,30 +314,35 @@ export const Predict = () => {
                 onClick={handlePredict}
                 disabled={loading}
               >
-                {loading ? 'Analyzing…' : 'Analyze Image'}
+                {loading ? t("analyzing") : t("analyzeImage")}
               </Button>
             )}
 
             {latestDetection && (
-              <>
-                <DetectionCard {...latestDetection} />
-                <PestInfoTabs pestName={latestDetection.pestName} />
-              </>
-            )}
-          </div>
+  <>
+    <DetectionCard {...latestDetection} />
+    <PestInfoTabs
+      pestName={latestDetection.pestName}
+      language={i18n.language as "en" | "hi" | "mr"}
+    />
+  </>
+)}          </div>
 
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="w-4 h-4" />
-              <h3 className="font-semibold">Recent Activity</h3>
+              <h3 className="font-semibold">
+                {t("recentActivity")}
+              </h3>
             </div>
+
             {recentActivity.length ? (
               recentActivity.map((d) => (
                 <DetectionCard key={d.id} {...d} compact />
               ))
             ) : (
               <p className="text-sm text-muted-foreground text-center py-6">
-                No recent detections
+                {t("noRecent")}
               </p>
             )}
           </Card>

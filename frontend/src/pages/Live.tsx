@@ -5,9 +5,11 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DetectionCard } from '@/components/DetectionCard';
-import { PestInfoTabs } from '@/components/PestInfoTabs'; // ✅ ALREADY EXISTS
+import { PestInfoTabs } from '@/components/PestInfoTabs';
 import { useToast } from '@/hooks/use-toast';
 import { predictApi, alertApi, analyticsApi } from '@/lib/api';
+import { useTranslation } from 'react-i18next';
+import i18n from "@/lib/i18n";
 
 interface Detection {
   id: string;
@@ -17,6 +19,7 @@ interface Detection {
   timestamp: string;
   imageUrl?: string;
 }
+
 const formatIST = (date: string | Date) =>
   new Date(
     typeof date === 'string' ? date + 'Z' : date.toISOString()
@@ -31,21 +34,19 @@ const formatIST = (date: string | Date) =>
   });
 
 export const Live = () => {
+  const { t } = useTranslation();
+
   const [cameraActive, setCameraActive] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
   const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
-  const [latestDetection, setLatestDetection] = useState<Detection | null>(null); // ✅ NEW
+  const [latestDetection, setLatestDetection] = useState<Detection | null>(null);
   const [captureCount, setCaptureCount] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-
-  /* =========================
-     FETCH RECENT (MONGODB)
-  ========================= */
 
   const fetchRecentFromDB = async () => {
     try {
@@ -70,10 +71,6 @@ export const Live = () => {
     return () => clearInterval(poll);
   }, []);
 
-  /* =========================
-     CAMERA CONTROL
-  ========================= */
-
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -88,8 +85,8 @@ export const Live = () => {
       setVideoReady(false);
     } catch {
       toast({
-        title: 'Camera error',
-        description: 'Please allow camera permission',
+        title: t("cameraError"),
+        description: t("cameraErrorDesc"),
         variant: 'destructive',
       });
     }
@@ -112,10 +109,6 @@ export const Live = () => {
     setIsMonitoring(false);
     setVideoReady(false);
   };
-
-  /* =========================
-     CAPTURE & ANALYZE
-  ========================= */
 
   const captureAndAnalyze = useCallback(async () => {
     if (!videoRef.current || !cameraActive || !videoReady) return;
@@ -147,7 +140,7 @@ export const Live = () => {
           imageUrl: canvas.toDataURL('image/jpeg'),
         };
 
-        setLatestDetection(detection); // ✅ FOR TAB BELOW
+        setLatestDetection(detection);
         setRecentDetections((prev) => [detection, ...prev].slice(0, 3));
         setCaptureCount((c) => c + 1);
 
@@ -158,8 +151,11 @@ export const Live = () => {
           });
 
           toast({
-            title: '⚠️ High Risk Detected',
-            description: `${res.data.pestName} detected`,
+            title: t("highRiskDetected"),
+            description: t("highRiskDetectedDesc", {
+              pestName: res.data.pestName,
+              confidence: detection.confidence.toFixed(2),
+            }),
             variant: 'destructive',
           });
         }
@@ -167,11 +163,7 @@ export const Live = () => {
         console.error('Prediction failed', err);
       }
     }, 'image/jpeg');
-  }, [cameraActive, videoReady, toast]);
-
-  /* =========================
-     AUTO MODE
-  ========================= */
+  }, [cameraActive, videoReady, toast, t]);
 
   useEffect(() => {
     if (!autoMode || !cameraActive || !isMonitoring || !videoReady) return;
@@ -187,25 +179,21 @@ export const Live = () => {
     return () => stopCamera();
   }, []);
 
-  /* =========================
-     UI
-  ========================= */
-
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Live Monitoring</h1>
+            <h1 className="text-2xl font-bold">{t("liveTitle")}</h1>
             <p className="text-muted-foreground text-sm">
-              Real-time pest detection with automatic capture
+              {t("liveSubtitle")}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <Switch checked={autoMode} onCheckedChange={setAutoMode} />
             <Zap className="w-4 h-4" />
-            <span className="text-sm">Auto Mode</span>
+            <span className="text-sm">{t("autoMode")}</span>
           </div>
         </div>
 
@@ -231,7 +219,7 @@ export const Live = () => {
                       className="bg-green-800 hover:bg-green-900"
                       onClick={startCamera}
                     >
-                      Open Camera
+                      {t("openCamera")}
                     </Button>
                   </div>
                 )}
@@ -248,7 +236,7 @@ export const Live = () => {
                   }}
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Start Monitoring
+                  {t("startMonitoring")}
                 </Button>
 
                 <Button
@@ -257,38 +245,37 @@ export const Live = () => {
                   onClick={stopCamera}
                 >
                   <Power className="w-4 h-4 mr-2" />
-                  Camera Off
+                  {t("cameraOff")}
                 </Button>
               </div>
 
-              {/* ✅ LATEST DETECTION + INFO & RECOMMENDATION */}
               {latestDetection && (
-                <Card className="mx-4 mb-4">
-                  <div className="p-4 space-y-4">
-                    <h3 className="font-semibold text-sm">
-                      Latest Detection
-                    </h3>
-
-                    <DetectionCard {...latestDetection} />
-
-                    <PestInfoTabs pestName={latestDetection.pestName} />
-                  </div>
-                </Card>
+                <>
+                  <DetectionCard {...latestDetection} />
+                  <PestInfoTabs
+                    pestName={latestDetection.pestName}
+                    language={i18n.language as "en" | "hi" | "mr"}
+                  />
+                </>
               )}
             </Card>
           </div>
 
           <div className="space-y-4">
             <Card className="bg-green-800 text-white p-4">
-              <h3 className="font-semibold">Session Captures</h3>
+              <h3 className="font-semibold">{t("sessionCaptures")}</h3>
               <p className="text-3xl font-bold mt-1">{captureCount}</p>
               <p className="text-sm opacity-80">
-                {autoMode ? 'Auto capture mode' : 'Manual capture mode'}
+                {autoMode
+                  ? t("autoCaptureMode")
+                  : t("manualCaptureMode")}
               </p>
             </Card>
 
             <Card className="p-4">
-              <h3 className="font-semibold mb-3">Recent Detections</h3>
+              <h3 className="font-semibold mb-3">
+                {t("recentDetections")}
+              </h3>
               <div className="space-y-2">
                 {recentDetections.map((d) => (
                   <DetectionCard key={d.id} {...d} compact />
