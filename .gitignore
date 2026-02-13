@@ -24,3 +24,10 @@ Thumbs.db
 
 # Images + uploads (optional)
 uploads/
+
+
+node_modules
+dist
+build
+*.h5
+*.pth
