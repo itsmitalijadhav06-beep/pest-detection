@@ -12,6 +12,7 @@ huggingface_hub
 
 # Environment
 python-dotenv
+pytz
 
 
 # Database
