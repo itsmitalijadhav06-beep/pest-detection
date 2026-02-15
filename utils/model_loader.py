@@ -1,7 +1,12 @@
 import os
 import requests
 import numpy as np
-import tensorflow as tf
+
+try:
+    from tflite_runtime.interpreter import Interpreter
+except ImportError:
+    import tensorflow as tf
+    Interpreter = tf.lite.Interpreter
 
 MODEL_PATH = "pest_model.tflite"
 MODEL_URL = os.getenv(
@@ -27,7 +32,7 @@ def get_interpreter():
                     f.write(chunk)
 
         print("✅ Loading TFLite model...")
-        _interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+        _interpreter = Interpreter(model_path=MODEL_PATH)
         _interpreter.allocate_tensors()
 
         _input_details = _interpreter.get_input_details()
