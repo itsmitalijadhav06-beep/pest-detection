@@ -21,7 +21,6 @@ router = APIRouter(
     dependencies=[Depends(security)]
 )
 
-model = get_model()
 
 PEST_CLASSES = [
     "green_leafhopper",
@@ -39,40 +38,44 @@ PEST_RISK_MAP = {
     "rice_stem_borer": "high",
 }
 
+from utils.model_loader import get_interpreter
+import numpy as np
+
 @router.post("/predict")
 async def predict_and_save(
     file: UploadFile = File(...),
     user_id: str = Depends(get_current_user)
 ):
     try:
-        # 🔒 Read image safely
         image_bytes = await file.read()
         if not image_bytes:
             raise HTTPException(status_code=400, detail="Empty image file")
 
-        # 🖼️ base64 preview
         image_base64 = base64.b64encode(image_bytes).decode()
         image_url = f"data:{file.content_type};base64,{image_base64}"
 
-        # 🧠 preprocess
         try:
             image = Image.open(BytesIO(image_bytes)).convert("RGB")
         except Exception:
             raise HTTPException(status_code=400, detail="Invalid image file")
 
         image = image.resize((299, 299))
-        image_array = np.array(image) / 255.0
+        image_array = np.array(image, dtype=np.float32) / 255.0
         image_array = np.expand_dims(image_array, axis=0)
 
-        # 🔮 predict
-        preds = model.predict(image_array)[0]
+        # 🔥 Load TFLite interpreter lazily
+        interpreter, input_details, output_details = get_interpreter()
+
+        interpreter.set_tensor(input_details[0]['index'], image_array)
+        interpreter.invoke()
+        preds = interpreter.get_tensor(output_details[0]['index'])[0]
+
         idx = int(np.argmax(preds))
 
         pest_name = PEST_CLASSES[idx]
         confidence = float(preds[idx])
         risk = PEST_RISK_MAP.get(pest_name, "low")
 
-        # 📦 Mongo document
         doc = {
             "userId": ObjectId(user_id) if isinstance(user_id, str) else user_id,
             "pestName": pest_name,
@@ -80,12 +83,10 @@ async def predict_and_save(
             "risk": risk,
             "imageUrl": image_url,
             "createdAt": datetime.now(timezone.utc)
-
         }
 
         inserted = predictions_collection.insert_one(doc)
 
-        # ✅ RETURN RESPONSE (THIS WAS MISSING)
         return {
             "_id": str(inserted.inserted_id),
             "userId": str(doc["userId"]),

@@ -1,26 +1,23 @@
-# Core ML
-tensorflow==2.10.0
+# Core ML (Lightweight)
+tflite-runtime
 numpy==1.26.4
 pillow
+requests
 
-# FastAPI 
+# FastAPI
 fastapi==0.95.2
 uvicorn[standard]==0.22.0
 pydantic==1.10.13
 python-multipart
-huggingface_hub
 
 # Environment
 python-dotenv
 pytz
 
-
 # Database
-pymongo
-motor
 pymongo>=4.7
+motor
 dnspython
-
 
 # Auth & Security
 passlib[bcrypt]

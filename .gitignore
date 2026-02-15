@@ -21,6 +21,7 @@ Thumbs.db
 *.h5
 *.keras
 *.pkl
+*.tflite
 
 # Images + uploads (optional)
 uploads/
@@ -29,5 +30,4 @@ uploads/
 node_modules
 dist
 build
-*.h5
 *.pth
