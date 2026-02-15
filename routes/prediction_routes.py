@@ -9,7 +9,7 @@ from bson import ObjectId
 
 from config.db import predictions_collection
 from middleware.auth_middleware import get_current_user
-from utils.model_loader import get_model
+from utils.model_loader import get_interpreter
 from datetime import datetime, timezone
 import pytz
 
@@ -38,7 +38,6 @@ PEST_RISK_MAP = {
     "rice_stem_borer": "high",
 }
 
-from utils.model_loader import get_interpreter
 import numpy as np
 
 @router.post("/predict")
