@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import heroBackground from "@/assets/hero-rice-field.jpg";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 /* =======================
    Logo Component
@@ -57,107 +59,136 @@ const Logo = ({
 /* =======================
    Header
 ======================= */
-const Header = () => (
-  <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-    <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-      <Link to="/">
-        <Logo size="sm" showText />
-      </Link>
+const Header = () => {
+  const { t } = useTranslation();
 
-      <nav className="flex items-center gap-4">
-        <Link to="/signin">
-          <Button variant="ghost" className="text-foreground hover:text-primary">
-            Login
-          </Button>
+  const changeLanguage = (lang: "en" | "hi" | "mr") => {
+    i18n.changeLanguage(lang);
+  };
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <Link to="/">
+          <Logo size="sm" showText />
         </Link>
-        <Link to="/signup">
-          <Button variant="default">Sign Up</Button>
-        </Link>
-      </nav>
-    </div>
-  </header>
-);
+
+        <nav className="flex items-center gap-4">
+          <select
+            onChange={(e) => changeLanguage(e.target.value as any)}
+            value={i18n.language}
+            className="border rounded-md px-2 py-1 text-sm bg-white"
+          >
+            <option value="en">EN</option>
+            <option value="hi">हिंदी</option>
+            <option value="mr">मराठी</option>
+          </select>
+
+          <Link to="/signin">
+            <Button variant="ghost" className="text-foreground hover:text-primary">
+              {t("login")}
+            </Button>
+          </Link>
+
+          <Link to="/signup">
+            <Button variant="default">
+              {t("signup")}
+            </Button>
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+};
 
 /* =======================
    Hero Section
 ======================= */
-const HeroSection = () => (
-  <section
-    className="relative min-h-screen flex items-center justify-center pt-20"
-    style={{
-      backgroundImage: `url(${heroBackground})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}
-  >
-    <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white/80" />
+const HeroSection = () => {
+  const { t } = useTranslation();
 
-    <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-      <div className="flex justify-center mb-8">
-        <Logo size="lg" showText={false} />
+  return (
+    <section
+      className="relative min-h-screen flex items-center justify-center pt-20"
+      style={{
+        backgroundImage: `url(${heroBackground})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white/80" />
+
+      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+        <div className="flex justify-center mb-8">
+          <Logo size="lg" showText={false} />
+        </div>
+
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-6">
+          {t("landingTitle")}
+        </h1>
+
+        <p className="text-lg md:text-xl text-black/70 mb-4 max-w-2xl mx-auto">
+          {t("landingSubtitle")}
+        </p>
+
+        <p className="text-base text-black/60 mb-10 max-w-xl mx-auto">
+          {t("landingDescription")}
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to="/signin">
+            <Button size="lg" className="px-8 py-6 text-lg rounded-full shadow-lg">
+              {t("detectPest")}
+            </Button>
+          </Link>
+
+          <Link to="/signin">
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 py-6 text-lg rounded-full bg-white/80 backdrop-blur-sm border-black/20 text-black hover:bg-white"
+            >
+              {t("login")}
+            </Button>
+          </Link>
+        </div>
       </div>
-
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-6">
-        PestGuard AI Detection
-      </h1>
-
-      <p className="text-lg md:text-xl text-black/70 mb-4 max-w-2xl mx-auto">
-        An AI-powered system to detect and identify common rice pests from images instantly.
-      </p>
-
-      <p className="text-base text-black/60 mb-10 max-w-xl mx-auto">
-        Helping farmers and agricultural experts protect rice crops through smart technology.
-      </p>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Link to="/signin">
-          <Button size="lg" className="px-8 py-6 text-lg rounded-full shadow-lg">
-            Detect Pest
-          </Button>
-        </Link>
-
-        <Link to="/signin">
-          <Button
-            size="lg"
-            variant="outline"
-            className="px-8 py-6 text-lg rounded-full bg-white/80 backdrop-blur-sm border-black/20 text-black hover:bg-white"
-          >
-            Login
-          </Button>
-        </Link>
-      </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* =======================
    Stats Bar
 ======================= */
-const stats = [
-  { value: "95%+", label: "Detection Accuracy" },
-  { value: "5+", label: "Pest Species" },
-  { value: "<3s", label: "Analysis Time" },
-  { value: "24/7", label: "Availability" },
-];
+const StatsBar = () => {
+  const { t } = useTranslation();
 
-const StatsBar = () => (
-  <section className="bg-primary py-10">
-    <div className="container mx-auto px-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        {stats.map((stat, index) => (
-          <div key={index}>
-            <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
-              {stat.value}
+  const stats = [
+    { value: "95%+", label: t("stats_accuracy") },
+    { value: "5+", label: t("stats_species") },
+    { value: "<3s", label: t("stats_time") },
+    { value: "24/7", label: t("stats_availability") },
+  ];
+
+  return (
+    <section className="bg-primary py-10">
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {stats.map((stat, index) => (
+            <div key={index}>
+              <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
+                {stat.value}
+              </div>
+              <div className="text-sm md:text-base text-primary-foreground/80">
+                {stat.label}
+              </div>
             </div>
-            <div className="text-sm md:text-base text-primary-foreground/80">
-              {stat.label}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* =======================
    About Section
@@ -211,25 +242,15 @@ const HowItWorks = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
         {steps.map((item, index) => (
           <div key={index} className="relative">
-            {/* Connecting line (desktop only) */}
-            {index < steps.length - 1 && (
-              <div className="hidden lg:block absolute top-14 left-[60%] w-full h-0.5 bg-border">
-                <div className="absolute right-0 -top-1 w-2 h-2 rotate-45 border-t-2 border-r-2 border-border" />
-              </div>
-            )}
-
             <div className="bg-card rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow relative z-10">
-              {/* Step Number */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-sm font-bold px-3 py-1 rounded-full shadow">
                 {item.step}
               </div>
 
-              {/* Icon */}
               <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mt-6 mb-6">
                 <item.icon className="w-8 h-8 text-primary" />
               </div>
 
-              {/* Text */}
               <h3 className="text-lg font-semibold text-foreground mb-3">
                 {item.title}
               </h3>

@@ -70,5 +70,63 @@
 "rec2": "Apply recommended pest control measures",
 "rec3": "Monitor crop condition daily",
 "rec4": "Maintain proper irrigation & field hygiene",
-"rec5": "Consult an agricultural expert if spread increases"
+"rec5": "Consult an agricultural expert if spread increases",
+"landingTitle": "PestGuard AI Detection",
+  "landingSubtitle": "An AI-powered system to detect and identify common rice pests from images instantly.",
+  "landingDescription": "Helping farmers and agricultural experts protect rice crops through smart technology.",
+  "detectPest": "Detect Pest",
+  "login": "Login",
+  "signup": "Sign Up",
+  "stats_accuracy": "Detection Accuracy",
+  "stats_species": "Pest Species",
+  "stats_time": "Analysis Time",
+  "stats_availability": "Availability",
+
+  "about_title": "About PestGuard AI",
+  "about_desc1": "PestGuard AI is an intelligent pest detection system designed specifically for rice cultivation using deep learning models.",
+  "about_desc2": "Our mission is to empower farmers with accessible technology that enables early pest identification and timely action.",
+
+  "how_title": "How It Works",
+  "how_subtitle": "Detect rice pests in just a few simple steps",
+
+  "step1_title": "Upload Image",
+  "step1_desc": "Upload a photo of the affected crop.",
+  "step2_title": "AI Analysis",
+  "step2_desc": "AI analyzes the image for pests.",
+  "step3_title": "Get Results",
+  "step3_desc": "Instant pest identification.",
+  "step4_title": "Take Action",
+  "step4_desc": "Follow recommended treatment.",
+
+  "why_title": "Why Choose PestGuard AI?",
+  "why1_title": "Instant Detection",
+  "why1_desc": "Results in seconds.",
+  "why2_title": "High Accuracy",
+  "why2_desc": "Reliable pest classification.",
+  "why3_title": "Crop Protection",
+  "why3_desc": "Prevent major losses.",
+  "why4_title": "Pest Focused",
+  "why4_desc": "Designed for rice pests.",
+
+  "features_title": "Powerful Smart Features",
+  "feature1_title": "Real-Time Alerts",
+  "feature1_desc": "Instant email notifications for high-risk pest detection.",
+  "feature2_title": "Multi-Language Support",
+  "feature2_desc": "Available in English, Hindi, and Marathi for farmers.",
+  "feature3_title": "Confidence Filtering",
+  "feature3_desc": "Prevents wrong predictions using AI confidence thresholding.",
+  "feature4_title": "Smart Analytics",
+  "feature4_desc": "Track pest trends monthly and yearly.",
+
+  "testimonials_title": "What Users Say",
+  "testimonial1": "This system helped me detect stem borer early and save my crop.",
+  "testimonial2": "Accurate predictions and useful recommendations.",
+
+  "demo_title": "Try PestGuard AI Today",
+  "demo_desc": "Upload a crop image and detect pests instantly with AI-powered analysis.",
+  "start_detection": "Start Detection",
+
+  "footer_text": "Empowering farmers with AI-driven pest detection."
+
+
 }
