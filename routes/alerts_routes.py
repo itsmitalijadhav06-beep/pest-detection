@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from middleware.auth_middleware import get_current_user
-import smtplib
-from email.mime.text import MIMEText
 import os
+import requests
 
 security = HTTPBearer()
 
@@ -12,61 +11,85 @@ router = APIRouter(
     dependencies=[Depends(security)]
 )
 
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL")
+
+
 @router.post("/email")
 def send_email_alert(
     data: dict,
     user_id: str = Depends(get_current_user)
 ):
-    pest_name = data.get("pest_name")
-    confidence = data.get("confidence")
-    language = data.get("language", "en")  # ✅ NEW
+    try:
+        pest_name = data.get("pest_name")
+        confidence = data.get("confidence")
+        language = data.get("language", "en")
 
-    sender = os.getenv("EMAIL_USER")
-    password = os.getenv("EMAIL_PASSWORD")
-    receiver = sender  # or farmer email from DB
+        receiver = FROM_EMAIL  # or fetch farmer email from DB
 
-    # ✅ LANGUAGE SWITCH
-    if language == "hi":
-        subject = "🚨 PestGuard चेतावनी: उच्च जोखिम कीट पाया गया"
-        body = f"""
-        ⚠️ उच्च जोखिम कीट पाया गया!
+        # ✅ LANGUAGE SWITCH
+        if language == "hi":
+            subject = "🚨 PestGuard चेतावनी: उच्च जोखिम कीट पाया गया"
+            body = f"""
+⚠️ उच्च जोखिम कीट पाया गया!
 
-        कीट: {pest_name}
-        विश्वास स्तर: {confidence}%
+कीट: {pest_name}
+विश्वास स्तर: {confidence}%
 
-        कृपया तुरंत कार्रवाई करें।
-        """
+कृपया तुरंत कार्रवाई करें।
+"""
+        elif language == "mr":
+            subject = "🚨 PestGuard सूचना: उच्च जोखीम कीड आढळली"
+            body = f"""
+⚠️ उच्च जोखीम कीड आढळली!
 
-    elif language == "mr":
-        subject = "🚨 PestGuard सूचना: उच्च जोखीम कीड आढळली"
-        body = f"""
-        ⚠️ उच्च जोखीम कीड आढळली!
+कीड: {pest_name}
+विश्वास पातळी: {confidence}%
 
-        कीड: {pest_name}
-        विश्वास पातळी: {confidence}%
+कृपया त्वरित उपाययोजना करा.
+"""
+        else:
+            subject = "🚨 PestGuard Alert: High Risk Pest Detected"
+            body = f"""
+⚠️ High Risk Pest Detected!
 
-        कृपया त्वरित उपाययोजना करा.
-        """
+Pest: {pest_name}
+Confidence: {confidence}%
 
-    else:  # default English
-        subject = "🚨 PestGuard Alert: High Risk Pest Detected"
-        body = f"""
-        ⚠️ High Risk Pest Detected!
+Immediate action is recommended.
+"""
 
-        Pest: {pest_name}
-        Confidence: {confidence}%
+        url = "https://api.sendgrid.com/v3/mail/send"
 
-        Immediate action is recommended.
-        """
+        headers = {
+            "Authorization": f"Bearer {SENDGRID_API_KEY}",
+            "Content-Type": "application/json"
+        }
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = receiver
+        payload = {
+            "personalizations": [
+                {
+                    "to": [{"email": receiver}],
+                    "subject": subject
+                }
+            ],
+            "from": {"email": FROM_EMAIL},
+            "content": [
+                {
+                    "type": "text/plain",
+                    "value": body
+                }
+            ]
+        }
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login(sender, password)
-        server.send_message(msg)
+        response = requests.post(url, headers=headers, json=payload)
 
-    return {"message": "Email sent successfully"}
+        if response.status_code != 202:
+            print("SendGrid error:", response.text)
+            raise HTTPException(status_code=500, detail="Email failed")
+
+        return {"message": "Email sent successfully"}
+
+    except Exception as e:
+        print("Email error:", e)
+        raise HTTPException(status_code=500, detail="Email failed")
