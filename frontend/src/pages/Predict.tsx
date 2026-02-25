@@ -158,7 +158,23 @@ export const Predict = () => {
       formData.append('file', selectedFile);
 
       const res = await predictApi.predict(formData);
-      const confidencePercent = res.data.confidence * 100;
+const data = res.data;
+
+// 🔥 Handle Low Confidence Case
+if (data.status === "uncertain") {
+  setLatestDetection(null); // clear previous result
+
+  toast({
+    title: "Low Confidence",
+    description: data.message,
+    variant: "destructive",
+  });
+
+  setLoading(false);
+  return;
+}
+
+const confidencePercent = data.confidence * 100;
 
       const detection: Detection = {
         id: res.data._id,

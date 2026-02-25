@@ -13,6 +13,7 @@ from utils.model_loader import get_interpreter
 from datetime import datetime, timezone
 import pytz
 
+CONFIDENCE_THRESHOLD = 0.75  # 75% threshold
 
 security = HTTPBearer()
 
@@ -20,7 +21,6 @@ router = APIRouter(
     tags=["Prediction"],
     dependencies=[Depends(security)]
 )
-
 
 PEST_CLASSES = [
     "green_leafhopper",
@@ -37,8 +37,6 @@ PEST_RISK_MAP = {
     "rice_leaf_roller": "high",
     "rice_stem_borer": "high",
 }
-
-import numpy as np
 
 @router.post("/predict")
 async def predict_and_save(
@@ -73,6 +71,15 @@ async def predict_and_save(
 
         pest_name = PEST_CLASSES[idx]
         confidence = float(preds[idx])
+
+        # 🔥 Confidence Thresholding (NEW ADDITION)
+        if confidence < CONFIDENCE_THRESHOLD:
+            return {
+                "status": "uncertain",
+                "message": "Low confidence. The uploaded image may not be a crop with a pest. Please upload a clear image of the affected crop.",
+                "confidence": round(confidence * 100, 2)
+            }
+
         risk = PEST_RISK_MAP.get(pest_name, "low")
 
         doc = {

@@ -130,15 +130,29 @@ export const Live = () => {
 
       try {
         const res = await predictApi.predict(formData);
+const data = res.data;
 
-        const detection: Detection = {
-          id: res.data._id ?? Date.now().toString(),
-          pestName: res.data.pestName,
-          confidence: res.data.confidence * 100,
-          risk: res.data.risk,
-          timestamp: formatIST(new Date()),
-          imageUrl: canvas.toDataURL('image/jpeg'),
-        };
+// 🔥 Handle low-confidence case
+if (data.status === "uncertain") {
+  console.log("Low confidence frame ignored");
+
+  // Optional: show small toast (not destructive)
+  toast({
+    title: "Low Confidence",
+    description: data.message,
+  });
+
+  return; // STOP execution — do not create detection
+}
+
+const detection: Detection = {
+  id: data._id ?? Date.now().toString(),
+  pestName: data.pestName,
+  confidence: data.confidence * 100,
+  risk: data.risk,
+  timestamp: formatIST(new Date()),
+  imageUrl: canvas.toDataURL('image/jpeg'),
+};
 
         setLatestDetection(detection);
         setRecentDetections((prev) => [detection, ...prev].slice(0, 3));
