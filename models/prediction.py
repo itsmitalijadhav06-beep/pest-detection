@@ -16,7 +16,7 @@ PEST_RISK_MAP = {
     "rice_stem_borer": "high"
 }
 
-CONFIDENCE_THRESHOLD = 0.75  # 75%
+CONFIDENCE_THRESHOLD = 0.90  # 75%
 
 def get_risk_level(pest_name: str) -> str:
     return PEST_RISK_MAP.get(pest_name, "low")

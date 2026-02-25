@@ -13,7 +13,7 @@ from utils.model_loader import get_interpreter
 from datetime import datetime, timezone
 import pytz
 
-CONFIDENCE_THRESHOLD = 0.75  # 75% threshold
+CONFIDENCE_THRESHOLD = 0.90  # 75% threshold
 
 security = HTTPBearer()
 
