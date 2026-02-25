@@ -193,31 +193,33 @@ const StatsBar = () => {
 /* =======================
    About Section
 ======================= */
-const AboutSection = () => (
-  <section
-    className="relative py-20"
-    style={{
-      backgroundImage: `url(${heroBackground})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center bottom",
-    }}
-  >
-    <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/60 to-white/80" />
-    <div className="relative z-10 container mx-auto px-6 text-center max-w-4xl">
-      <h2 className="text-3xl md:text-4xl font-bold text-black mb-8">
-        About PestGuard AI
-      </h2>
-      <p className="text-base md:text-lg text-black/70 mb-6">
-        PestGuard AI is an intelligent pest detection system designed specifically
-        for rice cultivation using deep learning models.
-      </p>
-      <p className="text-base md:text-lg text-black/70">
-        Our mission is to empower farmers with accessible technology that enables
-        early pest identification and timely action.
-      </p>
-    </div>
-  </section>
-);
+const AboutSection = () => {
+  const { t } = useTranslation();
+
+  return (
+    <section
+      className="relative py-20"
+      style={{
+        backgroundImage: `url(${heroBackground})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center bottom",
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/60 to-white/80" />
+      <div className="relative z-10 container mx-auto px-6 text-center max-w-4xl">
+        <h2 className="text-3xl md:text-4xl font-bold text-black mb-8">
+          {t("about_title")}
+        </h2>
+        <p className="text-base md:text-lg text-black/70 mb-6">
+          {t("about_desc1")}
+        </p>
+        <p className="text-base md:text-lg text-black/70">
+          {t("about_desc2")}
+        </p>
+      </div>
+    </section>
+  );
+};
 
 /* =======================
    How It Works
@@ -229,42 +231,72 @@ const steps = [
   { icon: ClipboardList, step: "04", title: "Take Action", description: "Follow recommended treatment." },
 ];
 
-const HowItWorks = () => (
-  <section className="py-20 bg-secondary">
-    <div className="container mx-auto px-6">
-      <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">
-        How It Works
-      </h2>
-      <p className="text-muted-foreground text-center mb-14 max-w-2xl mx-auto">
-        Detect rice pests in just a few simple steps
-      </p>
+const HowItWorks = () => {
+  const { t } = useTranslation();
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-        {steps.map((item, index) => (
-          <div key={index} className="relative">
-            <div className="bg-card rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow relative z-10">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-sm font-bold px-3 py-1 rounded-full shadow">
-                {item.step}
+  const steps = [
+    {
+      icon: Upload,
+      step: "01",
+      title: t("step1_title"),
+      description: t("step1_desc"),
+    },
+    {
+      icon: Cpu,
+      step: "02",
+      title: t("step2_title"),
+      description: t("step2_desc"),
+    },
+    {
+      icon: FileCheck,
+      step: "03",
+      title: t("step3_title"),
+      description: t("step3_desc"),
+    },
+    {
+      icon: ClipboardList,
+      step: "04",
+      title: t("step4_title"),
+      description: t("step4_desc"),
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-secondary">
+      <div className="container mx-auto px-6">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">
+          {t("how_title")}
+        </h2>
+        <p className="text-muted-foreground text-center mb-14 max-w-2xl mx-auto">
+          {t("how_subtitle")}
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+          {steps.map((item, index) => (
+            <div key={index} className="relative">
+              <div className="bg-card rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow relative z-10">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-sm font-bold px-3 py-1 rounded-full shadow">
+                  {item.step}
+                </div>
+
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mt-6 mb-6">
+                  <item.icon className="w-8 h-8 text-primary" />
+                </div>
+
+                <h3 className="text-lg font-semibold text-foreground mb-3">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {item.description}
+                </p>
               </div>
-
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mt-6 mb-6">
-                <item.icon className="w-8 h-8 text-primary" />
-              </div>
-
-              <h3 className="text-lg font-semibold text-foreground mb-3">
-                {item.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {item.description}
-              </p>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
-
+    </section>
+  );
+};
 /* =======================
    Features
 ======================= */
@@ -275,30 +307,42 @@ const features = [
   { icon: Bug, title: "Pest Focused", description: "Designed for rice pests." },
 ];
 
-const FeaturesSection = () => (
-  <section className="py-20">
-    <div className="container mx-auto px-6">
-      <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
-        Why Choose PestGuard AI?
-      </h2>
+const FeaturesSection = () => {
+  const { t } = useTranslation();
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {features.map((feature, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-8 text-center">
-              <div className="w-14 h-14 rounded-full border flex items-center justify-center mx-auto mb-6">
-                <feature.icon className="w-7 h-7 text-foreground" />
-              </div>
-              <h3 className="font-semibold mb-3">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+  const features = [
+    { icon: Zap, title: t("feature1_title"), description: t("feature1_desc") },
+    { icon: Target, title: t("feature2_title"), description: t("feature2_desc") },
+    { icon: Shield, title: t("feature3_title"), description: t("feature3_desc") },
+    { icon: Bug, title: t("feature4_title"), description: t("feature4_desc") },
+  ];
+
+  return (
+    <section className="py-20">
+      <div className="container mx-auto px-6">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
+          {t("why_title")}
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-8 text-center">
+                <div className="w-14 h-14 rounded-full border flex items-center justify-center mx-auto mb-6">
+                  <feature.icon className="w-7 h-7 text-foreground" />
+                </div>
+                <h3 className="font-semibold mb-3">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {feature.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
-
+    </section>
+  );
+};
 /* =======================
    Main Page
 ======================= */
