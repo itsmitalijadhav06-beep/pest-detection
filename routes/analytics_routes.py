@@ -11,6 +11,19 @@ router = APIRouter(
     tags=["Analytics"],
     dependencies=[Depends(security)]
 )
+PEST_RISK_MAP = {
+    "green_leafhopper": "medium",
+    "planthopper": "medium",
+    "rice_bug": "low",
+    "rice_leaf_roller": "high",
+    "rice_stem_borer": "high",
+}
+
+SEVERITY_SCORE = {
+    "low": 1,
+    "medium": 2,
+    "high": 3
+}
 
 # =========================
 # MONTHLY ANALYTICS
@@ -150,3 +163,65 @@ def daily_pest_analysis(user_id: str = Depends(get_current_user)):
     ]
 
     return list(predictions_collection.aggregate(pipeline))
+
+# =========================
+# MONTHLY INTELLIGENCE REPORT
+# =========================
+from datetime import datetime
+
+@router.get("/monthly-report")
+def generate_monthly_report(user_id: str = Depends(get_current_user)):
+
+    uid = ObjectId(user_id)
+
+    # Get current month
+    now = datetime.utcnow()
+    start_of_month = datetime(now.year, now.month, 1)
+
+    # Fetch this month's predictions
+    monthly_data = list(predictions_collection.find({
+        "userId": uid,
+        "createdAt": {"$gte": start_of_month}
+    }))
+
+    if not monthly_data:
+        return {"message": "No detections this month."}
+
+    total_detections = len(monthly_data)
+
+    pest_count = {}
+    severity_count = {"high": 0, "medium": 0, "low": 0}
+    total_score = 0
+
+    for detection in monthly_data:
+        pest = detection.get("pestName", "unknown")
+
+        # Count pest frequency
+        pest_count[pest] = pest_count.get(pest, 0) + 1
+
+        # Get severity from map
+        risk = PEST_RISK_MAP.get(pest, "low")
+        severity_count[risk] += 1
+
+        # Add score
+        total_score += SEVERITY_SCORE[risk]
+
+    # Calculate Severity Index
+    severity_index = round(total_score / total_detections, 2)
+
+    # Generate Smart Conclusion
+    if severity_index > 2.3:
+        conclusion = "Severe pest activity detected. High outbreak possibility."
+    elif severity_index > 1.5:
+        conclusion = "Moderate pest activity observed. Preventive measures recommended."
+    else:
+        conclusion = "Low pest activity observed. Crop condition appears stable."
+
+    return {
+        "month": f"{now.year}-{now.month:02d}",
+        "totalDetections": total_detections,
+        "pestBreakdown": pest_count,
+        "severityDistribution": severity_count,
+        "severityIndex": severity_index,
+        "conclusion": conclusion
+    }

@@ -57,6 +57,7 @@ export const analyticsApi = {
   getStats: () => api.get('/api/analytics/stats'),
   getRecent: () => api.get('/api/analytics/recent'),
   getdaily: () => api.get('/api/analytics/daily'),
+  getMonthlyReport: () => api.get('/api/analytics/monthly-report'),
 };
 
 // Alert API
