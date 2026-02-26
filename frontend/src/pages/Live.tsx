@@ -36,6 +36,23 @@ const formatIST = (date: string | Date) =>
 export const Live = () => {
   const { t } = useTranslation();
 
+  // 🔊 Voice Alert Function (Stable Version)
+const speakAlert = (text: string, language: string) => {
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  if (language === "hi") speech.lang = "hi-IN";
+  else if (language === "mr") speech.lang = "mr-IN";
+  else speech.lang = "en-US";
+
+  speech.rate = 1;
+  speech.pitch = 1;
+
+  window.speechSynthesis.speak(speech);
+};
   const [cameraActive, setCameraActive] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
@@ -159,20 +176,47 @@ const detection: Detection = {
         setCaptureCount((c) => c + 1);
 
         if (res.data.risk === 'high') {
-          await alertApi.sendEmail({
-            pest_name: res.data.pestName,
-            confidence: detection.confidence,
-          });
 
-          toast({
-            title: t("highRiskDetected"),
-            description: t("highRiskDetectedDesc", {
-              pestName: res.data.pestName,
-              confidence: detection.confidence.toFixed(2),
-            }),
-            variant: 'destructive',
-          });
-        }
+  await alertApi.sendEmail({
+    pest_name: res.data.pestName,
+    confidence: detection.confidence,
+    language: i18n.language,
+  });
+
+  // 🔥 Format pest name
+  const formattedPestName = res.data.pestName
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char: string) => char.toUpperCase());
+
+  // 🔊 Stable Short Sentences
+  if (i18n.language === "hi") {
+    speakAlert(
+      `उच्च जोखिम कीट पाया गया। कीट का नाम ${formattedPestName}। कृपया तुरंत कार्रवाई करें।`,
+      "hi"
+    );
+  }
+  else if (i18n.language === "mr") {
+    speakAlert(
+      `उच्च जोखीम कीड आढळली। कीडचे नाव ${formattedPestName}। कृपया त्वरित कारवाई करा।`,
+      "mr"
+    );
+  }
+  else {
+    speakAlert(
+      `High risk pest detected. Pest name ${formattedPestName}. Please take immediate action.`,
+      "en"
+    );
+  }
+
+  toast({
+    title: t("highRiskDetected"),
+    description: t("highRiskDetectedDesc", {
+      pestName: res.data.pestName,
+      confidence: detection.confidence.toFixed(2),
+    }),
+    variant: 'destructive',
+  });
+}
       } catch (err) {
         console.error('Prediction failed', err);
       }
@@ -264,14 +308,46 @@ const detection: Detection = {
               </div>
 
               {latestDetection && (
-                <>
-                  <DetectionCard {...latestDetection} />
-                  <PestInfoTabs
-                    pestName={latestDetection.pestName}
-                    language={i18n.language as "en" | "hi" | "mr"}
-                  />
-                </>
-              )}
+  <>
+    <DetectionCard {...latestDetection} />
+
+    <Button
+      className="w-full mt-2"
+      variant="outline"
+      onClick={() => {
+        const formattedPestName = latestDetection.pestName
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char: string) => char.toUpperCase());
+
+        if (i18n.language === "hi") {
+          speakAlert(
+            `कीट का नाम ${formattedPestName}। कृपया जांच करें।`,
+            "hi"
+          );
+        }
+        else if (i18n.language === "mr") {
+          speakAlert(
+            `कीडचे नाव ${formattedPestName}। कृपया तपासणी करा।`,
+            "mr"
+          );
+        }
+        else {
+          speakAlert(
+            `Pest detected. ${formattedPestName}. Please check.`,
+            "en"
+          );
+        }
+      }}
+    >
+      🔊 {t("playVoiceAlert")}
+    </Button>
+
+    <PestInfoTabs
+      pestName={latestDetection.pestName}
+      language={i18n.language as "en" | "hi" | "mr"}
+    />
+  </>
+)}
             </Card>
           </div>
 

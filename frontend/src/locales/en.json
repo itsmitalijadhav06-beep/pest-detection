@@ -126,7 +126,10 @@
   "demo_desc": "Upload a crop image and detect pests instantly with AI-powered analysis.",
   "start_detection": "Start Detection",
 
-  "footer_text": "Empowering farmers with AI-driven pest detection."
+  "footer_text": "Empowering farmers with AI-driven pest detection.",
+
+  "voice_high_risk": "High risk pest detected: {{pestName}}. Please take immediate action.",
+  "playVoiceAlert": "Play Voice Alert"
 
 
 }

@@ -38,6 +38,45 @@ const formatIST = (date: string | Date) =>
 export const Predict = () => {
   const { t } = useTranslation();
 
+ const speakAlert = (text: string, language: string) => {
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const voices = window.speechSynthesis.getVoices();
+
+  let selectedVoice;
+
+  if (language === "hi") {
+    selectedVoice = voices.find(v => v.lang.includes("hi"));
+  } 
+  else if (language === "mr") {
+    selectedVoice = voices.find(v => v.lang.includes("mr"));
+  } 
+  else {
+    selectedVoice = voices.find(v => v.lang.includes("en"));
+  }
+
+  // 🔥 Break into smaller sentences
+  const sentences = text.split(/[.!?]/);
+
+  sentences.forEach((sentence) => {
+    if (sentence.trim() === "") return;
+
+    const speech = new SpeechSynthesisUtterance(sentence.trim());
+
+    if (selectedVoice) speech.voice = selectedVoice;
+
+    if (language === "hi") speech.lang = "hi-IN";
+    else if (language === "mr") speech.lang = "mr-IN";
+    else speech.lang = "en-US";
+
+    speech.rate = 1;
+    speech.pitch = 1;
+
+    window.speechSynthesis.speak(speech);
+  });
+};
   const [activeTab, setActiveTab] = useState<'camera' | 'upload'>('upload');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -190,21 +229,47 @@ const confidencePercent = data.confidence * 100;
 
       if (res.data.risk === 'high') {
 
-await alertApi.sendEmail({
-  pest_name: res.data.pestName,
-  confidence: confidencePercent,
-  language: i18n.language, // 🔥 send current language
-});
+  await alertApi.sendEmail({
+    pest_name: res.data.pestName,
+    confidence: confidencePercent,
+    language: i18n.language,
+  });
 
-        toast({
-          title: t("highRiskDetected"),
-          description: t("highRiskDetectedDesc", {
-            pestName: res.data.pestName,
-            confidence: confidencePercent.toFixed(1),
-          }),
-          variant: 'destructive',
-        });
-      } else {
+  // 🔊 SPEAK ALERT
+  // 🔥 Format pest name properly for speech
+// 🔥 Format pest name properly
+const formattedPestName = res.data.pestName
+  .replace(/_/g, " ")
+  .replace(/\b\w/g, (char: string) => char.toUpperCase());
+
+// 🔊 Speak based on language (SHORT SENTENCES for stability)
+if (i18n.language === "hi") {
+  speakAlert(
+    `उच्च जोखिम कीट पाया गया। कीट का नाम ${formattedPestName}। कृपया तुरंत कार्रवाई करें।`,
+    "hi"
+  );
+}
+else if (i18n.language === "mr") {
+  speakAlert(
+    `उच्च जोखीम कीड आढळली। कीडचे नाव ${formattedPestName}। कृपया त्वरित कारवाई करा।`,
+    "mr"
+  );
+}
+else {
+  speakAlert(
+    `High risk pest detected. Pest name ${formattedPestName}. Please take immediate action.`,
+    "en"
+  );
+}
+  toast({
+    title: t("highRiskDetected"),
+    description: t("highRiskDetectedDesc", {
+      pestName: formattedPestName,
+      confidence: confidencePercent.toFixed(1),
+    }),
+    variant: 'destructive',
+  });
+} else {
         toast({
           title: t("detectionSuccess"),
           description: t("detectionSuccessDesc", {
@@ -334,15 +399,36 @@ await alertApi.sendEmail({
               </Button>
             )}
 
-            {latestDetection && (
+   {latestDetection && (
   <>
     <DetectionCard {...latestDetection} />
+
+    {/* 🔊 Voice Button */}
+    <Button
+      className="w-full mt-2"
+      variant="outline"
+      onClick={() => {
+        const formattedPestName = latestDetection.pestName
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char: string) => char.toUpperCase());
+
+        speakAlert(
+          t("voice_high_risk", {
+            pestName: formattedPestName,
+          }),
+          i18n.language
+        );
+      }}
+    >
+      🔊 {t("playVoiceAlert")}
+    </Button>
+
     <PestInfoTabs
       pestName={latestDetection.pestName}
       language={i18n.language as "en" | "hi" | "mr"}
     />
   </>
-)}          </div>
+)}         </div>
 
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-3">

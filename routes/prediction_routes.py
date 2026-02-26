@@ -38,6 +38,12 @@ PEST_RISK_MAP = {
     "rice_stem_borer": "high",
 }
 
+SEVERITY_SCORE = {
+    "low": 1,
+    "medium": 2,
+    "high": 3
+}
+
 @router.post("/predict")
 async def predict_and_save(
     file: UploadFile = File(...),
