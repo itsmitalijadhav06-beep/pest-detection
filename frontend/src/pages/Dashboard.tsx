@@ -119,12 +119,49 @@ export const Dashboard = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const downloadMonthlyPDF = () => {
+  if (!monthlyReport) return;
+
+  const content = `
+PestGuard AI - Monthly Intelligence Report
+-------------------------------------------
+
+Month: ${monthlyReport.month}
+Total Detections: ${monthlyReport.totalDetections}
+
+Pest Breakdown:
+${Object.entries(monthlyReport.pestBreakdown || {})
+  .map(([pest, count]) => `- ${pest.replace(/_/g, " ")}: ${count}`)
+  .join("\n")}
+
+Severity Distribution:
+High: ${monthlyReport.severityDistribution?.high}
+Medium: ${monthlyReport.severityDistribution?.medium}
+Low: ${monthlyReport.severityDistribution?.low}
+
+Severity Index: ${monthlyReport.severityIndex}
+
+Conclusion:
+${monthlyReport.conclusion}
+`;
+
+  const blob = new Blob([content], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `PestGuard_Monthly_Report_${monthlyReport.month}.pdf`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
   const [stats, setStats] = useState<Stats>({
     total: 0,
     high: 0,
     medium: 0,
     low: 0,
   });
+  const [monthlyReport, setMonthlyReport] = useState<any>(null);
 
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [yearlyData, setYearlyData] = useState<any[]>([]);
@@ -135,18 +172,20 @@ export const Dashboard = () => {
   const fetchData = async () => {
     try {
       const [
-        statsRes,
-        monthlyRes,
-        yearlyRes,
-        recentRes,
-        dailyRes,
-      ] = await Promise.all([
-        analyticsApi.getStats(),
-        analyticsApi.getMonthly(),
-        analyticsApi.getYearly(),
-        analyticsApi.getRecent(),
-        analyticsApi.getdaily(),
-      ]);
+  statsRes,
+  monthlyRes,
+  yearlyRes,
+  recentRes,
+  dailyRes,
+  reportRes,
+] = await Promise.all([
+  analyticsApi.getStats(),
+  analyticsApi.getMonthly(),
+  analyticsApi.getYearly(),
+  analyticsApi.getRecent(),
+  analyticsApi.getdaily(),
+  analyticsApi.getMonthlyReport(),   // 🔥 add this
+]);
 
       setStats(statsRes.data);
 
@@ -176,6 +215,8 @@ export const Dashboard = () => {
           count: p.count,
         }))
       );
+
+      setMonthlyReport(reportRes.data);
 
       setLastRefresh(new Date());
     } catch {
@@ -237,118 +278,173 @@ export const Dashboard = () => {
           <StatCard title={t("lowRisk")} value={stats.low} subtitle={t("underControl")} icon={CheckCircle} variant="success" />
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
 
-          <div className="lg:col-span-2 space-y-6">
+<div className="grid lg:grid-cols-3 gap-6 items-start">
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
-                {t("monthlySummary")}
-              </h3>
+  {/* LEFT COLUMN */}
+  <div className="lg:col-span-2 space-y-6">
 
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="monthLabel" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#14532d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+    <Card className="p-6">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">
+        <TrendingUp className="w-4 h-4 text-emerald-600" />
+        {t("monthlySummary")}
+      </h3>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                {t("annualTrend")}
-              </h3>
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={monthlyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="monthLabel" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="count" fill="#14532d" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
 
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={yearlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="count" stroke="#22c55e" strokeWidth={3} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </div>
+    <Card className="p-6">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">
+        <TrendingUp className="w-4 h-4 text-green-600" />
+        {t("annualTrend")}
+      </h3>
 
-          <div className="space-y-6">
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={yearlyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" />
+            <YAxis />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="#22c55e"
+              strokeWidth={3}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
 
-            <Card className="p-4">
-              <div className="flex justify-between mb-4">
-                <h3 className="font-semibold flex gap-2 items-center">
-                  <Clock className="w-4 h-4" /> {t("recentDetections")}
-                </h3>
-                <span className="text-xs text-green-600 flex gap-1 items-center">
-                  <span className="w-1.5 h-1.5 bg-green-600 rounded-full" /> Live
-                </span>
-              </div>
-
-              <div className="space-y-3 max-h-[280px] overflow-y-auto">
-                {recentDetections.map(d => (
-                  <DetectionCard
-                    key={d.id}
-                    pestName={d.pestName}
-                    confidence={d.confidence}
-                    risk={d.risk}
-                    timestamp={d.timestamp}
-                    imageUrl={d.imageUrl}
-                    compact
-                  />
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3">{t("dailyAnalysis")}</h3>
-              <p className="text-xs text-muted-foreground mb-3">
-                {t("dailyAnalysisDesc")}
-              </p>
-
-              <ul className="space-y-2 text-sm">
-                {pestCounts.map(p => (
-                  <li key={p.pestName} className="flex justify-between border-b pb-1">
-                    <span className="capitalize">
-                      {p.pestName.replace(/_/g, ' ')}
-                    </span>
-                    <span className="font-semibold">{p.count}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-
-            <Card className="p-4 bg-emerald-900 text-white">
-              <div className="flex items-center gap-2 mb-3">
-                <ShieldCheck className="w-5 h-5" />
-                <div>
-                  <h3 className="font-semibold">{t("quickRecommendations")}</h3>
-                  <p className="text-xs opacity-80">
-                    {t("recommendationDesc")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white text-emerald-900 rounded-lg p-4">
-                <ol className="text-sm space-y-2 list-decimal list-inside">
-                  <li>{t("rec1")}</li>
-                  <li>{t("rec2")}</li>
-                  <li>{t("rec3")}</li>
-                  <li>{t("rec4")}</li>
-                  <li>{t("rec5")}</li>
-                </ol>
-              </div>
-            </Card>
-
-          </div>
+<Card className="p-4 bg-emerald-900 text-white">
+      <div className="flex items-center gap-2 mb-3">
+        <ShieldCheck className="w-5 h-5" />
+        <div>
+          <h3 className="font-semibold">{t("quickRecommendations")}</h3>
+          <p className="text-xs opacity-80">
+            {t("recommendationDesc")}
+          </p>
         </div>
+      </div>
+
+      <div className="bg-white text-emerald-900 rounded-lg p-4">
+        <ol className="text-sm space-y-2 list-decimal list-inside">
+          <li>{t("rec1")}</li>
+          <li>{t("rec2")}</li>
+          <li>{t("rec3")}</li>
+          <li>{t("rec4")}</li>
+          <li>{t("rec5")}</li>
+        </ol>
+      </div>
+    </Card>
+  </div>
+
+  {/* RIGHT COLUMN */}
+  <div className="space-y-6">
+
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold flex items-center gap-2">
+          📄 {t("Monthly Intelligence Report")}
+        </h3>
+
+        <Button size="sm" onClick={downloadMonthlyPDF}>
+          📥 {t("Download Report")}
+        </Button>
+      </div>
+
+      {monthlyReport ? (
+        <div className="space-y-3 text-sm">
+
+          <p><strong>Month:</strong> {monthlyReport.month}</p>
+          <p><strong>Total Detections:</strong> {monthlyReport.totalDetections}</p>
+
+          <div>
+            <strong>Pest Breakdown:</strong>
+            <ul className="mt-2 space-y-1">
+              {Object.entries(monthlyReport.pestBreakdown || {}).map(([pest, count]) => (
+                <li key={pest} className="flex justify-between border-b pb-1">
+                  <span>{String(pest).replace(/_/g, " ")}</span>
+                  <span>{String(count)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <strong>Severity Index:</strong> {monthlyReport.severityIndex}
+          </div>
+
+          <div className="bg-emerald-50 p-3 rounded border">
+            <strong>Conclusion:</strong>
+            <p className="mt-1">{monthlyReport.conclusion}</p>
+          </div>
+
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-sm">
+          {t("noMonthlyData")}
+        </p>
+      )}
+    </Card>
+
+    <Card className="p-4">
+      <div className="flex justify-between mb-4">
+        <h3 className="font-semibold flex gap-2 items-center">
+          <Clock className="w-4 h-4" /> {t("recentDetections")}
+        </h3>
+        <span className="text-xs text-green-600 flex gap-1 items-center">
+          <span className="w-1.5 h-1.5 bg-green-600 rounded-full" /> Live
+        </span>
+      </div>
+
+      <div className="space-y-3 max-h-[280px] overflow-y-auto">
+        {recentDetections.map(d => (
+          <DetectionCard
+            key={d.id}
+            pestName={d.pestName}
+            confidence={d.confidence}
+            risk={d.risk}
+            timestamp={d.timestamp}
+            imageUrl={d.imageUrl}
+            compact
+          />
+        ))}
+      </div>
+    </Card>
+
+    <Card className="p-4">
+      <h3 className="font-semibold mb-3">{t("dailyAnalysis")}</h3>
+      <p className="text-xs text-muted-foreground mb-3">
+        {t("dailyAnalysisDesc")}
+      </p>
+
+      <ul className="space-y-2 text-sm">
+        {pestCounts.map(p => (
+          <li key={p.pestName} className="flex justify-between border-b pb-1">
+            <span className="capitalize">
+              {p.pestName.replace(/_/g, ' ')}
+            </span>
+            <span className="font-semibold">{p.count}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+
+  </div>
+
+</div>
       </div>
     </AppLayout>
   );
