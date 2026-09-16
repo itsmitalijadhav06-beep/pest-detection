@@ -26,7 +26,7 @@ Thumbs.db
 # Images + uploads (optional)
 uploads/
 
-
+.env
 node_modules
 dist
 build
